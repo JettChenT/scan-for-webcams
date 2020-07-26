@@ -1,8 +1,9 @@
+import os
 import shodan
 import requests
 from rich import print
 
-SHODAN_API_KEY = "j0B1M6qtOeGtKixNyAPtJV0Oj44Pg90Y"
+SHODAN_API_KEY = os.getenv("SHODAN_API_KEY") 
 api = shodan.Shodan(SHODAN_API_KEY)
 try:
     results = api.search('webcams')
