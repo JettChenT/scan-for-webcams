@@ -1,5 +1,12 @@
 # scan-for-webcams :camera:
-automatically scan for publically accessible webcams around the internet
+
+Automatically scan for publically accessible webcams around the internet
+
+## Table of contents
+
+- [Usage](#Usage)
+- [Installation](#Installation)
+- [Demo](#Demo)
 
 ## Usage
 
@@ -30,3 +37,7 @@ If your terminal supports links, click the link and open it in your browser, oth
       ` export "SHODAN_API_KEY"="<your api key>" `
 
 And then you can run the program!
+
+## Demo
+
+[![asciicast](https://asciinema.org/a/349819.svg)](https://asciinema.org/a/349819)
