@@ -51,9 +51,11 @@ class Scanner(object):
                 except:
                     continue
 
-    def MJPG(self):
+    def MJPG(self,check):
         scheme = self.MJPG_url_scheme
-        self.scan("MJPG-streamer", url_scheme=scheme, check_empty="{url}/?action=snapshot")
-
+        if check:
+            self.scan("MJPG-streamer", url_scheme=scheme, check_empty="{url}/?action=snapshot")
+        else:
+            self.scan("MJPG-streamer", url_scheme=scheme, check_empty="")
     def webcamXP(self):
         self.scan("webcamXP")
