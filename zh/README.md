@@ -2,7 +2,7 @@
 
 自动探测可公开访问的网络摄像头
 
-[中文文档](/zh/README.md)
+[English docs](../README.md)
 
 ## 目录
 
