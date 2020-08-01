@@ -1,3 +1,4 @@
 shodan==1.23.0
 requests==2.24.0
-rich==4.1.0
+rich==4.2.0
+clarifai==2.6.2

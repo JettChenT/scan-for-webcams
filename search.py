@@ -5,20 +5,34 @@ import socket
 import urllib
 from PIL import Image, ImageEnhance
 from rich import print
-
+from clarifai.rest import ClarifaiApp
 
 class Scanner(object):
     def __init__(self):
         socket.setdefaulttimeout(5)
         self.SHODAN_API_KEY = os.environ.get("SHODAN_API_KEY")
+        assert self.SHODAN_API_KEY != ""
         self.api = shodan.Shodan(self.SHODAN_API_KEY)
         # preset url schemes
         self.default_url_scheme = "[link=http://{ip}:{port}][i][green]{ip}[/green]:[red]{port}[/red][/link]"
         self.MJPG_url_scheme = "[link=http://{ip}:{port}/?action=stream][i]http://[green]{ip}[/green]:[red]{port}[/red]" \
                                "[blue]/?action=stream[/blue][/link]"
+        self.clarifai_initialized = False
+
+    def init_clarifai(self):
+        self.CLARIFAI_API_KEY = os.environ.get("CLARIFAI_API_KEY")
+        assert self.CLARIFAI_API_KEY != ""
+        self.clarifai_app = ClarifaiApp(api_key='ac61aa2283a04f54bffb59bbae86206e')
+        self.clarifai_model = self.clarifai_app.public_models.general_model
+        self.clarifai_initialized = True
+
+    def tag_image(self,url):
+        response = self.clarifai_model.predict_by_url(url=url)
+        results = [concept['name'] for concept in response['outputs'][0]['data']['concepts']]
+        return results
 
     def check_empty(self,image_source,tolerance=5)->bool:
-        im_loc = "tmp.png"
+        im_loc = f"tmp.png"
         urllib.request.urlretrieve(image_source, im_loc)
         im = Image.open(im_loc)
         extrema = im.convert("L").getextrema()
@@ -26,9 +40,12 @@ class Scanner(object):
             return False
         return True
 
-    def scan(self, camera_type, url_scheme = '', check_empty=''):
+    def scan(self, camera_type, url_scheme = '', check_empty='', tag=False):
         if url_scheme == '':
             url_scheme = self.default_url_scheme
+
+        if tag and (not self.clarifai_initialized):
+            self.init_clarifai()
 
         results = self.api.search("webcams")
         max_time = len(results["matches"])*10
@@ -48,14 +65,19 @@ class Scanner(object):
                             print(
                                 url_scheme.format(ip=result['ip_str'], port=result['port'])
                             )
+                            if tag:
+                                for t in self.tag_image(check_empty.format(url=url)):
+                                    print(f"[green]{t}[/green]",end=" ")
+                                print()
                 except:
                     continue
 
     def MJPG(self,check):
         scheme = self.MJPG_url_scheme
         if check:
-            self.scan("MJPG-streamer", url_scheme=scheme, check_empty="{url}/?action=snapshot")
+            self.scan("MJPG-streamer", url_scheme=scheme, check_empty="{url}/?action=snapshot",tag=True)
         else:
             self.scan("MJPG-streamer", url_scheme=scheme, check_empty="")
+
     def webcamXP(self):
         self.scan("webcamXP")
