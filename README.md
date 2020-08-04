@@ -36,6 +36,11 @@ If your terminal supports links, click the link and open it in your browser, oth
    2. Set environ `SHODAN_API_KEY` as your `API key`:
 
       ` export "SHODAN_API_KEY"="<your api key>" `
+4. set up clarifai:
+   1. go to [clarifai.com](https://clarifai.com), register/log in, create an application and grab your API key
+   2. set environ `CLARIFAI_API_KEY` as your `API key`
+        
+        ` export "CLARIFAI_API_KEY"="<your api key>" `
 
 And then you can run the program!
 
