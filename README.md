@@ -2,6 +2,7 @@
 
 Automatically scan for publically accessible webcams around the internet
 
+[中文文档](/zh/README.md)
 ## Table of contents
 
 - [Usage](#Usage)
