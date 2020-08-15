@@ -40,7 +40,7 @@ class Scanner(object):
             return False
         return True
 
-    def scan(self, camera_type, url_scheme = '', check_empty='', tag=False):
+    def scan(self, camera_type, url_scheme = '', check_empty_url='',check_empty = True, tag=False):
         if url_scheme == '':
             url_scheme = self.default_url_scheme
 
@@ -56,31 +56,31 @@ class Scanner(object):
                 try:
                     r = requests.get(url, timeout=5)
                     if r.status_code == 200:
-                        if check_empty == "":
+                        if check_empty == False:
                             print(
                                 url_scheme.format(ip=result['ip_str'], port=result['port'])
                             )
                             continue
-                        if self.check_empty(check_empty.format(url=url)):
+                        if self.check_empty(check_empty_url.format(url=url)):
                             print(
                                 url_scheme.format(ip=result['ip_str'], port=result['port'])
                             )
                             if tag:
-                                for t in self.tag_image(check_empty.format(url=url)):
+                                for t in self.tag_image(check_empty_url.format(url=url)):
                                     print(f"[green]{t}[/green]",end=" ")
                                 print()
                 except:
                     continue
 
-    def MJPG(self,check):
+    def MJPG(self,check,tag):
         scheme = self.MJPG_url_scheme
         if check:
-            self.scan("MJPG-streamer", url_scheme=scheme, check_empty="{url}/?action=snapshot",tag=True)
+            self.scan("MJPG-streamer", url_scheme=scheme, check_empty_url="{url}/?action=snapshot",tag=tag)
         else:
-            self.scan("MJPG-streamer", url_scheme=scheme, check_empty="")
+            self.scan("MJPG-streamer", url_scheme=scheme, check_empty_url="{url}/?action=snapshot",tag=tag)
 
-    def webcamXP(self,check):
+    def webcamXP(self,check,tag):
         if check:
-            self.scan("webcamXP", check_empty='{url}/cam_1.jpg', tag=True)
+            self.scan("webcamXP", check_empty_url='{url}/cam_1.jpg', tag=tag)
         else:
-            self.scan("webcamXP")
+            self.scan("webcamXP",check_empty_url='{url}/cam_1.jpg',tag=tag)

@@ -4,5 +4,14 @@ if check == "yes":
     check = True
 else:
     check = False
+
+tag = input("Do you want to generate description of the image?\n"
+            "enter yes or no:")
+
+if tag == "yes":
+    tag = True
+else:
+    tag = False
+
 scanner = Scanner()
-scanner.MJPG(check)
+scanner.MJPG(check,tag)
