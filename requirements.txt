@@ -1,5 +1,5 @@
 shodan==1.23.0
 requests==2.24.0
-rich==5.2.0
+rich==5.2.1
 pillow==7.2.0
 clarifai==2.6.2
