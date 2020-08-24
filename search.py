@@ -40,14 +40,14 @@ class Scanner(object):
             return False
         return True
 
-    def scan(self, camera_type, url_scheme = '', check_empty_url='',check_empty = True, tag=False):
+    def scan(self, camera_type, url_scheme = '', check_empty_url='',check_empty = True, tag=False, search_q="webcams"):
         if url_scheme == '':
             url_scheme = self.default_url_scheme
 
         if tag and (not self.clarifai_initialized):
             self.init_clarifai()
 
-        results = self.api.search("webcams")
+        results = self.api.search(search_q)
         max_time = len(results["matches"])*10
         print(f"maximum time:{max_time} seconds")
         for result in results["matches"]:
@@ -81,6 +81,6 @@ class Scanner(object):
 
     def webcamXP(self,check,tag):
         if check:
-            self.scan("webcamXP", check_empty_url='{url}/cam_1.jpg', tag=tag)
+            self.scan("webcamXP", check_empty_url='{url}/cam_1.jpg', tag=tag, search_q='product:webcamXP')
         else:
-            self.scan("webcamXP",check_empty_url='{url}/cam_1.jpg',tag=tag)
+            self.scan("webcamXP", check_empty_url='{url}/cam_1.jpg', tag=tag, search_q='product:webcamXP')
