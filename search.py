@@ -14,7 +14,7 @@ class Scanner(object):
         assert self.SHODAN_API_KEY != ""
         self.api = shodan.Shodan(self.SHODAN_API_KEY)
         # preset url schemes
-        self.default_url_scheme = "[link=http://{ip}:{port}][i][green]{ip}[/green]:[red]{port}[/red][/link]"
+        self.default_url_scheme = "[link=http://{ip}:{port}]http://[i][green]{ip}[/green]:[red]{port}[/red][/link]"
         self.MJPG_url_scheme = "[link=http://{ip}:{port}/?action=stream][i]http://[green]{ip}[/green]:[red]{port}[/red]" \
                                "[blue]/?action=stream[/blue][/link]"
         self.clarifai_initialized = False
@@ -60,27 +60,22 @@ class Scanner(object):
                             print(
                                 url_scheme.format(ip=result['ip_str'], port=result['port'])
                             )
-                            continue
-                        if self.check_empty(check_empty_url.format(url=url)):
+                        elif self.check_empty(check_empty_url.format(url=url)):
                             print(
                                 url_scheme.format(ip=result['ip_str'], port=result['port'])
                             )
-                            if tag:
-                                for t in self.tag_image(check_empty_url.format(url=url)):
-                                    print(f"[green]{t}[/green]",end=" ")
-                                print()
+                        else:
+                            continue
+                        if tag:
+                            for t in self.tag_image(check_empty_url.format(url=url)):
+                                print(f"[green]{t}[/green]",end=" ")
+                            print()
                 except:
                     continue
 
     def MJPG(self,check,tag):
         scheme = self.MJPG_url_scheme
-        if check:
-            self.scan("MJPG-streamer", url_scheme=scheme, check_empty_url="{url}/?action=snapshot",tag=tag)
-        else:
-            self.scan("MJPG-streamer", url_scheme=scheme, check_empty_url="{url}/?action=snapshot",tag=tag)
+        self.scan("MJPG-streamer", url_scheme=scheme, check_empty=check,check_empty_url="{url}/?action=snapshot",tag=tag)
 
     def webcamXP(self,check,tag):
-        if check:
-            self.scan("webcamXP", check_empty_url='{url}/cam_1.jpg', tag=tag, search_q='product:webcamXP')
-        else:
-            self.scan("webcamXP", check_empty_url='{url}/cam_1.jpg', tag=tag, search_q='product:webcamXP')
+        self.scan("webcamXP", check_empty=check, check_empty_url='{url}/cam_1.jpg', tag=tag, search_q='product:webcamXP')
