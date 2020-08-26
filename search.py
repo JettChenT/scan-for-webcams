@@ -11,7 +11,8 @@ class Scanner(object):
     def __init__(self):
         socket.setdefaulttimeout(5)
         self.SHODAN_API_KEY = os.environ.get("SHODAN_API_KEY")
-        assert self.SHODAN_API_KEY != ""
+        if self.SHODAN_API_KEY == None:
+            raise KeyError("Shodan API key not found in envrion")
         self.api = shodan.Shodan(self.SHODAN_API_KEY)
         # preset url schemes
         self.default_url_scheme = "[link=http://{ip}:{port}]http://[i][green]{ip}[/green]:[red]{port}[/red][/link]"
@@ -21,7 +22,8 @@ class Scanner(object):
 
     def init_clarifai(self):
         self.CLARIFAI_API_KEY = os.environ.get("CLARIFAI_API_KEY")
-        assert self.CLARIFAI_API_KEY != ""
+        if self.CLARIFAI_API_KEY == None:
+            raise KeyError("Clarifai API key not found in environ")
         self.clarifai_app = ClarifaiApp(api_key=self.CLARIFAI_API_KEY)
         self.clarifai_model = self.clarifai_app.public_models.general_model
         self.clarifai_initialized = True
@@ -40,7 +42,7 @@ class Scanner(object):
             return False
         return True
 
-    def scan(self, camera_type, url_scheme = '', check_empty_url='',check_empty = True, tag=False, search_q="webcams"):
+    def scan(self, camera_type, url_scheme = '', check_empty_url='',check_empty = True, tag=True, search_q="webcams"):
         if url_scheme == '':
             url_scheme = self.default_url_scheme
 
