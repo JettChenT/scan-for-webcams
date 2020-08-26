@@ -6,6 +6,7 @@ import urllib
 from PIL import Image, ImageEnhance
 from rich import print
 from clarifai.rest import ClarifaiApp
+from halo import Halo
 
 class Scanner(object):
     def __init__(self):
@@ -48,8 +49,13 @@ class Scanner(object):
 
         if tag and (not self.clarifai_initialized):
             self.init_clarifai()
-
-        results = self.api.search(search_q)
+        spinner = Halo(text='Looking for possible servers...', spinner='dots')
+        spinner.start()
+        try:
+            results = self.api.search(search_q)
+            spinner.succeed("Done")
+        except:
+            spinner.fail("Get data from API failed")
         max_time = len(results["matches"])*10
         print(f"maximum time:{max_time} seconds")
         for result in results["matches"]:
@@ -62,16 +68,23 @@ class Scanner(object):
                             print(
                                 url_scheme.format(ip=result['ip_str'], port=result['port'])
                             )
-                        elif self.check_empty(check_empty_url.format(url=url)):
-                            print(
-                                url_scheme.format(ip=result['ip_str'], port=result['port'])
-                            )
                         else:
-                            continue
+                            is_empty = self.check_empty(check_empty_url.format(url=url))
+                            if is_empty:
+                                print(
+                                    url_scheme.format(ip=result['ip_str'], port=result['port'])
+                                )
+                            else:
+                                spinner.close()
+                                continue
                         if tag:
-                            for t in self.tag_image(check_empty_url.format(url=url)):
-                                print(f"[green]{t}[/green]",end=" ")
+                            tags = self.tag_image(check_empty_url.format(url=url))
+                            for t in tags:
+                                print(f"|[green]{t}[/green]|",end=" ")
+                            if len(tags)==0:
+                                print("[i green]no description[i green]",end="")
                             print()
+                        spinner.close()
                 except:
                     continue
 
