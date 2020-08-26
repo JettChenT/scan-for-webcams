@@ -22,7 +22,7 @@ class Scanner(object):
     def init_clarifai(self):
         self.CLARIFAI_API_KEY = os.environ.get("CLARIFAI_API_KEY")
         assert self.CLARIFAI_API_KEY != ""
-        self.clarifai_app = ClarifaiApp(api_key='ac61aa2283a04f54bffb59bbae86206e')
+        self.clarifai_app = ClarifaiApp(self.CLARIFAI_API_KEY)
         self.clarifai_model = self.clarifai_app.public_models.general_model
         self.clarifai_initialized = True
 
