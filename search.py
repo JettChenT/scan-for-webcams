@@ -58,35 +58,43 @@ class Scanner(object):
             spinner.fail("Get data from API failed")
         max_time = len(results["matches"])*10
         print(f"maximum time:{max_time} seconds")
+        camera_type_list = []
         for result in results["matches"]:
             if camera_type in result["data"]:
-                url = f"http://{result['ip_str']}:{result['port']}"
-                try:
-                    r = requests.get(url, timeout=5)
-                    if r.status_code == 200:
-                        if check_empty == False:
+                camera_type_list.append(result)
+        cnt = 0
+        for result in camera_type_list:
+            url = f"http://{result['ip_str']}:{result['port']}"
+            cnt+=1
+            print(f"{cnt}/{len(camera_type_list)}")
+            try:
+                r = requests.get(url, timeout=5)
+                if r.status_code == 200:
+                    if check_empty == False:
+                        print(
+                            url_scheme.format(ip=result['ip_str'], port=result['port'])
+                        )
+                    else:
+                        is_empty = self.check_empty(check_empty_url.format(url=url))
+                        if is_empty:
                             print(
                                 url_scheme.format(ip=result['ip_str'], port=result['port'])
                             )
                         else:
-                            is_empty = self.check_empty(check_empty_url.format(url=url))
-                            if is_empty:
-                                print(
-                                    url_scheme.format(ip=result['ip_str'], port=result['port'])
-                                )
-                            else:
-                                spinner.close()
-                                continue
-                        if tag:
-                            tags = self.tag_image(check_empty_url.format(url=url))
-                            for t in tags:
-                                print(f"|[green]{t}[/green]|",end=" ")
-                            if len(tags)==0:
-                                print("[i green]no description[i green]",end="")
-                            print()
-                        spinner.close()
-                except:
-                    continue
+                            spinner.close()
+                            continue
+                    if tag:
+                        tags = self.tag_image(check_empty_url.format(url=url))
+                        for t in tags:
+                            print(f"|[green]{t}[/green]|",end=" ")
+                        if len(tags)==0:
+                            print("[i green]no description[i green]",end="")
+                        print()
+                    spinner.close()
+                else:
+                    print("[red]webcam not avaliable[/red]")
+            except:
+                continue
 
     def MJPG(self,check,tag):
         scheme = self.MJPG_url_scheme
