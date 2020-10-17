@@ -11,11 +11,13 @@ Automatically scan for publically accessible webcams around the internet
 
 ## Usage
 
-* ` python MJPG.py ` : for public [MJPG streamers](https://github.com/jacksonliam/mjpg-streamer) around the internet
+* ` python main.py search MJPG` : for public [MJPG streamers](https://github.com/jacksonliam/mjpg-streamer) around the internet
 
-* ` python webcamXP.py ` : for public [webcamXP streamers](http://www.webcamxp.com/) around the internet
+* ` python main.py search webcamXP` : for public [webcamXP streamers](http://www.webcamxp.com/) around the internet
 
-The program will output a list of links with the format of `ip_address:port`
+* ` python main.py search --help`: for more options and help
+
+The program will output a list of links with the format of `ip_address:port`, and descriptions of the image beneath it.
 
 If your terminal supports links, click the link and open it in your browser, otherwise, copy the link and open it in your browser.
 

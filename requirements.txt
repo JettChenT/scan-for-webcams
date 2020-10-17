@@ -4,3 +4,4 @@ rich==8.0.0
 pillow==7.2.0
 clarifai==2.6.2
 halo == 0.0.30
+fire==0.3.1
