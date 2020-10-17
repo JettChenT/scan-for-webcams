@@ -49,10 +49,10 @@ class Scanner(object):
         if self.SHODAN_API_KEY == '':
             print("[red]Please set up shodan API key in environ![/red]")
             return
-        if tag and (not self.clarifai_initialized):
-            self.init_clarifai()
         spinner = Halo(text='Looking for possible servers...', spinner='dots')
         spinner.start()
+        if tag and (not self.clarifai_initialized):
+            self.init_clarifai()
         try:
             results = self.api.search(search_q)
             spinner.succeed("Done")
@@ -108,3 +108,6 @@ class Scanner(object):
 
     def webcamXP(self,check,tag):
         self.scan("webcamXP", check_empty=check, check_empty_url='{url}/cam_1.jpg', tag=tag, search_q='product:webcamXP')
+
+    def yawCam(self,check,tag):
+        self.scan("", check_empty=check,check_empty_url="{url}/out.jpg",tag=tag,search_q='product:yawCam')

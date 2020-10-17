@@ -14,6 +14,8 @@ class CLI:
             scanner.webcamXP(check,tag)
         elif preset == "MJPG":
             scanner.MJPG(check,tag)
+        elif preset == "yawCam":
+            scanner.yawCam(check,tag)
         else:
             print(f":camera: camera type [i]'{preset}'[/i] not yet supported, please add an issue in github to suggest a new camera type.")
 
