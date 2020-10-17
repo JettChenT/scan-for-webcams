@@ -46,7 +46,9 @@ class Scanner(object):
     def scan(self, camera_type, url_scheme = '', check_empty_url='',check_empty = True, tag=True, search_q="webcams"):
         if url_scheme == '':
             url_scheme = self.default_url_scheme
-
+        if self.SHODAN_API_KEY == '':
+            print("[red]Please set up shodan API key in environ![/red]")
+            return
         if tag and (not self.clarifai_initialized):
             self.init_clarifai()
         spinner = Halo(text='Looking for possible servers...', spinner='dots')
@@ -56,6 +58,7 @@ class Scanner(object):
             spinner.succeed("Done")
         except:
             spinner.fail("Get data from API failed")
+            return
         max_time = len(results["matches"])*10
         print(f"maximum time:{max_time} seconds")
         camera_type_list = []
@@ -93,6 +96,9 @@ class Scanner(object):
                     spinner.close()
                 else:
                     print("[red]webcam not avaliable[/red]")
+            except KeyboardInterrupt:
+                print("[red]terminating...")
+                break
             except:
                 continue
 
