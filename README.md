@@ -1,8 +1,9 @@
 # scan-for-webcams :camera:
 
-Automatically scan for publically accessible webcams around the internet
+![scan-for-webcamBannar](.github/scan-for-webcamBannar.png)
 
 [中文文档](/zh/README.md)
+
 ## Table of contents
 
 - [Usage](#Usage)
@@ -43,7 +44,7 @@ If your terminal supports links, click the link and open it in your browser, oth
 4. set up clarifai:
    1. go to [clarifai.com](https://clarifai.com), register/log in, create an application and grab your API key
    2. set environ `CLARIFAI_API_KEY` as your `API key`
-        
+     
         ` export "CLARIFAI_API_KEY"="<your api key>" `
 
 And then you can run the program!
