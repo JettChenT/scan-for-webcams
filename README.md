@@ -1,6 +1,6 @@
 # scan-for-webcams :camera:
 
-![scan-for-webcamBannar](.github/scan-for-webcamBannar.png)
+![scan-for-webcamBannar](./.github/scan-for-webcamBannar.png)
 
 [中文文档](/zh/README.md)
 
