@@ -11,9 +11,11 @@ Automatically scan for publically accessible webcams around the internet
 
 ## Usage
 
-* ` python main.py search MJPG` : for public [MJPG streamers](https://github.com/jacksonliam/mjpg-streamer) around the internet
+* ` python main.py search MJPG` : for public [MJPG streamers](https://github.com/jacksonliam/mjpg-streamer)
 
-* ` python main.py search webcamXP` : for public [webcamXP streamers](http://www.webcamxp.com/) around the internet
+* ` python main.py search webcamXP` : for public [webcamXP streamers](http://www.webcamxp.com/)
+
+* `python main.py search yawCam`: for public [yawCam steamers](https://www.yawcam.com/)
 
 * ` python main.py search --help`: for more options and help
 
@@ -48,4 +50,4 @@ And then you can run the program!
 
 ## Demo
 
-[![asciicast](https://asciinema.org/a/349819.svg)](https://asciinema.org/a/349819)
+[![asciicast](https://asciinema.org/a/366018.svg)](https://asciinema.org/a/366018)
