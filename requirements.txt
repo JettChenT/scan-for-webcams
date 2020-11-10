@@ -3,5 +3,5 @@ requests==2.24.0
 rich==9.2.0
 pillow==8.0.1
 clarifai==2.6.2
-halo == 0.0.30
+halo == 0.0.31
 fire==0.3.1
