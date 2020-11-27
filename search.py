@@ -7,11 +7,13 @@ from PIL import Image, ImageEnhance
 from rich import print
 from clarifai.rest import ClarifaiApp
 from halo import Halo
+from dotenv import load_dotenv
 
 class Scanner(object):
     def __init__(self):
         socket.setdefaulttimeout(5)
-        self.SHODAN_API_KEY = os.environ.get("SHODAN_API_KEY")
+        load_dotenv(override=True)
+        self.SHODAN_API_KEY = os.getenv("SHODAN_API_KEY")
         if self.SHODAN_API_KEY == None:
             raise KeyError("Shodan API key not found in envrion")
         self.api = shodan.Shodan(self.SHODAN_API_KEY)
@@ -22,7 +24,7 @@ class Scanner(object):
         self.clarifai_initialized = False
 
     def init_clarifai(self):
-        self.CLARIFAI_API_KEY = os.environ.get("CLARIFAI_API_KEY")
+        self.CLARIFAI_API_KEY = os.getenv("CLARIFAI_API_KEY")
         if self.CLARIFAI_API_KEY == None:
             raise KeyError("Clarifai API key not found in environ")
         self.clarifai_app = ClarifaiApp(api_key=self.CLARIFAI_API_KEY)
