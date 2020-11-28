@@ -3,6 +3,12 @@ import fire
 from rich import print
 
 class CLI:
+    def setup(self):
+        SHODAN_API_KEY = input("Please enter your SHODAN API KEY:")
+        CLARIFAI_API_KEY = input("Please enter your CLARIFAI API KEY:")
+        with open ('.env', 'w') as f:
+            f.write(f"SHODAN_API_KEY={SHODAN_API_KEY}\n")
+            f.write(f"CLARIFAI_API_KEY={CLARIFAI_API_KEY}")
     def search(self,preset,check=True,tag=True):
         """
         :param preset: string, the type of pre written camera you want. choose from: 1)"webcamXP" 2)"MJPG 3)"yawCam"

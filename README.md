@@ -38,14 +38,12 @@ If your terminal supports links, click the link and open it in your browser, oth
 
    1. go to [shodan.io](https://shodan.io), register/log in and grab your API key
 
-   2. Edit .env, set SHODAN_API_KEY to your api key:
-
-      ` SHODAN_API_KEY=YOUR_API_KEY `
 4. set up clarifai:
    1. go to [clarifai.com](https://clarifai.com), register/log in, create an application and grab your API key
-   2. Edit .env, set CLARIFAI_API_KEY to your api key:
-     
-       ` CLARIFAI_API_KEY=YOUR_API_KEY `
+   
+5. Add API keys:
+   1. run `python main.py setup`
+   2. enter your shodan and clarifai API keys
 
 And then you can run the program!
 
