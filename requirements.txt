@@ -1,6 +1,6 @@
 shodan==1.24.0
 requests==2.24.0
-rich==8.0.0
+rich==9.2.0
 pillow==8.0.0
 clarifai==2.6.2
 halo == 0.0.30
