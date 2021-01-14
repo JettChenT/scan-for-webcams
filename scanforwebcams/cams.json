@@ -1,0 +1,24 @@
+{
+    "default":{
+        "url_scheme":"[link=http://{ip}:{port}]http://[i][green]{ip}[/green]:[red]{port}[/red][/link]",
+        "search_q":"webcams"
+    },
+    "webcamXP":{
+        "url_scheme":"[def]",
+        "check_empty_url":"{url}/cam_1.jpg",
+        "search_q":"product:webcamXP",
+        "camera_type":"webcamXP"
+    },
+    "MJPG":{
+        "url_scheme":"[link=http://{ip}:{port}/?action=stream][i]http://[green]{ip}[/green]:[red]{port}[/red][blue]/?action=stream[/blue][/link]",
+        "check_empty_url":"{url}/?action=snapshot",
+        "search_q":"[def]",
+        "camera_type":"MJPG-streamer"   
+    },
+    "yawCam":{
+        "url_scheme":"[def]",
+        "check_empty_url":"{url}/out.jpg",
+        "search_q":"[def]",
+        "camera_type":""
+    }
+}

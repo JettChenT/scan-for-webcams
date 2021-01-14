@@ -3,6 +3,7 @@ import shodan
 import requests
 import socket
 import urllib
+import json
 from PIL import Image, ImageEnhance
 from rich import print
 from clarifai.rest import ClarifaiApp
@@ -18,12 +19,14 @@ class Scanner(object):
         self.SHODAN_API_KEY = os.getenv("SHODAN_API_KEY")
         if self.SHODAN_API_KEY == None:
             raise KeyError("Shodan API key not found in envrion")
-        self.api = shodan.Shodan(self.SHODAN_API_KEY)
+        self.api = shodan.Shodan(self.SHODAN_API_KEY)  
         # preset url schemes
         self.default_url_scheme = "[link=http://{ip}:{port}]http://[i][green]{ip}[/green]:[red]{port}[/red][/link]"
         self.MJPG_url_scheme = "[link=http://{ip}:{port}/?action=stream][i]http://[green]{ip}[/green]:[red]{port}[/red]" \
                                "[blue]/?action=stream[/blue][/link]"
         self.clarifai_initialized = False
+        with open("cams.json") as f:
+            self.config = json.load(f)
 
     def init_clarifai(self):
         self.CLARIFAI_API_KEY = os.getenv("CLARIFAI_API_KEY")
@@ -107,8 +110,20 @@ class Scanner(object):
                 print("[red]terminating...")
                 break
             except:
+                print("[red]webcam not avaliable[/red]")
                 continue
         return store
+
+    def scan_preset(self,preset,check,tag):
+        if not self.config.has_key(preset):
+            raise KeyError("The preset entered doesn't exist")
+        for key in self.config[preset]:
+            if self.config[preset][key] == '[def]':
+                self.config[preset][key] = self.config['default'][key]
+        config = self.config[preset]
+        config['check_empty'] = check
+        config['tag'] = tag
+        self.scan(**config)
 
     def MJPG(self,check,tag):
         scheme = self.MJPG_url_scheme

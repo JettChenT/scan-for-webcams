@@ -18,20 +18,13 @@ class CLI:
             f.write(f"SHODAN_API_KEY={SHODAN_API_KEY}\n")
             f.write(f"CLARIFAI_API_KEY={CLARIFAI_API_KEY}")
 
-    def search(self,preset,check=True,tag=True):
+    def search(self,preset,check=True,tag=True,store=False):
         """
         :param preset: string, the type of pre written camera you want. choose from: 1)"webcamXP" 2)"MJPG 3)"yawCam"
         :param check: boolean, indicates whether or not you want to check if the image is completly black or white.
         :param tag: boolean, indicates whether or not you want to generate descriptions for the webcam.
         """
-        if preset == "webcamXP":
-            self.scanner.webcamXP(check,tag)
-        elif preset == "MJPG":
-            self.scanner.MJPG(check,tag)
-        elif preset == "yawCam":
-            self.scanner.yawCam(check,tag)
-        else:
-            print(f":camera: camera type [i]'{preset}'[/i] not yet supported, please add an issue in github to suggest a new camera type.")
+        self.scanner.scan_preset(preset,check,tag)
 
     def search_custom(self,camera_type, url_scheme = '', check_empty_url='',check_empty = True, tag=True, search_q="webcams"):
         """
@@ -42,5 +35,5 @@ class CLI:
         :param tag: boolean, indicates whether or not you want to generate descriptions for the image
         :param search_q: string, the term to search for in shodan
         """
-        self.scanner.search(camera_type=camera_type,url_scheme=url_scheme,check_empty_url=check_empty_url,
+        self.scanner.scan(camera_type=camera_type,url_scheme=url_scheme,check_empty_url=check_empty_url,
                        check_empty=check_empty,tag=tag,search_q=search_q)
