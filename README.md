@@ -12,13 +12,13 @@
 
 ## Usage
 
-* ` python main.py search MJPG` : for public [MJPG streamers](https://github.com/jacksonliam/mjpg-streamer)
+* ` sfw search MJPG` : for public [MJPG streamers](https://github.com/jacksonliam/mjpg-streamer)
 
-* ` python main.py search webcamXP` : for public [webcamXP streamers](http://www.webcamxp.com/)
+* ` sfw search webcamXP` : for public [webcamXP streamers](http://www.webcamxp.com/)
 
-* `python main.py search yawCam`: for public [yawCam steamers](https://www.yawcam.com/)
+* `sfw search yawCam`: for public [yawCam steamers](https://www.yawcam.com/)
 
-* ` python main.py search --help`: for more options and help
+* ` sfw search --help`: for more options and help
 
 The program will output a list of links with the format of `ip_address:port`, and descriptions of the image beneath it.
 
@@ -26,23 +26,17 @@ If your terminal supports links, click the link and open it in your browser, oth
 
 ## Installation
 
-1. clone&cd into the repo:
+1. install package from PYPI:
+   `pip install scan-for-webcams`
 
-   ` git clone https://github.com/JettChenT/scan-for-webcams;cd scan-for-webcams `
+2. set up shodan:
+   go to [shodan.io](https://shodan.io), register/log in and grab your API key
 
-2. install requirements:
-
-   `pip install -r requirements.txt`
-
-3. set up shodan:
-
-   1. go to [shodan.io](https://shodan.io), register/log in and grab your API key
-
-4. set up clarifai:
-   1. go to [clarifai.com](https://clarifai.com), register/log in, create an application and grab your API key
+3. set up clarifai:
+   go to [clarifai.com](https://clarifai.com), register/log in, create an application and grab your API key
    
-5. Add API keys:
-   1. run `python main.py setup`
+4. Add API keys:
+   1. run `sfw setup`
    2. enter your shodan and clarifai API keys
 
 And then you can run the program!

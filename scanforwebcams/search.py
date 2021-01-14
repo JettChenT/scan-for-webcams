@@ -8,11 +8,13 @@ from rich import print
 from clarifai.rest import ClarifaiApp
 from halo import Halo
 from dotenv import load_dotenv
+from pathlib import Path
 
 class Scanner(object):
     def __init__(self):
         socket.setdefaulttimeout(5)
-        load_dotenv(override=True)
+        env_path = Path(".")/'.env'
+        load_dotenv(override=True, dotenv_path=env_path)
         self.SHODAN_API_KEY = os.getenv("SHODAN_API_KEY")
         if self.SHODAN_API_KEY == None:
             raise KeyError("Shodan API key not found in envrion")
@@ -62,16 +64,16 @@ class Scanner(object):
             spinner.fail("Get data from API failed")
             return
         max_time = len(results["matches"])*10
-        print(f"maximum time:{max_time} seconds")
+        print(f"maximum time: {max_time} seconds")
         camera_type_list = []
         for result in results["matches"]:
             if camera_type in result["data"]:
                 camera_type_list.append(result)
+        store = []
         cnt = 0
         for result in camera_type_list:
             url = f"http://{result['ip_str']}:{result['port']}"
             cnt+=1
-            print(f"{cnt}/{len(camera_type_list)}")
             try:
                 r = requests.get(url, timeout=5)
                 if r.status_code == 200:
@@ -82,10 +84,12 @@ class Scanner(object):
                     else:
                         is_empty = self.check_empty(check_empty_url.format(url=url))
                         if is_empty:
+                            store.append(result)
                             print(
                                 url_scheme.format(ip=result['ip_str'], port=result['port'])
                             )
                         else:
+                            print("[red]webcam is empty[/red]")
                             spinner.close()
                             continue
                     if tag:
@@ -95,6 +99,7 @@ class Scanner(object):
                         if len(tags)==0:
                             print("[i green]no description[i green]",end="")
                         print()
+                        store[-1]["tags"] = tags
                     spinner.close()
                 else:
                     print("[red]webcam not avaliable[/red]")
@@ -103,6 +108,7 @@ class Scanner(object):
                 break
             except:
                 continue
+        return store
 
     def MJPG(self,check,tag):
         scheme = self.MJPG_url_scheme

@@ -130,3 +130,7 @@ dmypy.json
 
 # custom
 shodan-api-key.env
+.idea/
+.tmpimage
+tmp/
+.env
