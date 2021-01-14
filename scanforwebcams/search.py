@@ -21,9 +21,6 @@ class Scanner(object):
             raise KeyError("Shodan API key not found in envrion")
         self.api = shodan.Shodan(self.SHODAN_API_KEY)  
         # preset url schemes
-        self.default_url_scheme = "[link=http://{ip}:{port}]http://[i][green]{ip}[/green]:[red]{port}[/red][/link]"
-        self.MJPG_url_scheme = "[link=http://{ip}:{port}/?action=stream][i]http://[green]{ip}[/green]:[red]{port}[/red]" \
-                               "[blue]/?action=stream[/blue][/link]"
         self.clarifai_initialized = False
         with open("cams.json") as f:
             self.config = json.load(f)
@@ -52,7 +49,7 @@ class Scanner(object):
 
     def scan(self, camera_type, url_scheme = '', check_empty_url='',check_empty = True, tag=True, search_q="webcams"):
         if url_scheme == '':
-            url_scheme = self.default_url_scheme
+            url_scheme = self.config['default']['url_scheme']
         if self.SHODAN_API_KEY == '':
             print("[red]Please set up shodan API key in environ![/red]")
             return
@@ -124,13 +121,3 @@ class Scanner(object):
         config['check_empty'] = check
         config['tag'] = tag
         self.scan(**config)
-
-    def MJPG(self,check,tag):
-        scheme = self.MJPG_url_scheme
-        self.scan("MJPG-streamer", url_scheme=scheme, check_empty=check,check_empty_url="{url}/?action=snapshot",tag=tag)
-
-    def webcamXP(self,check,tag):
-        self.scan("webcamXP", check_empty=check, check_empty_url='{url}/cam_1.jpg', tag=tag, search_q='product:webcamXP')
-
-    def yawCam(self,check,tag):
-        self.scan("", check_empty=check,check_empty_url="{url}/out.jpg",tag=tag,search_q='product:yawCam')
