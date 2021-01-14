@@ -4,11 +4,10 @@ from rich import print
 
 class CLI:
     def __init__(self):
-        print("INIT!")
         try:
             self.scanner = Scanner()
-        except KeyError as e:
-            print("[red] {e}")
+        except KeyError:
+            print("[red] API key not found")
             print("Please set up first:")
             self.setup()
 
