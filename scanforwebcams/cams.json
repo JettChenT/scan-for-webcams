@@ -18,7 +18,7 @@
     "yawCam":{
         "url_scheme":"[def]",
         "check_empty_url":"{url}/out.jpg",
-        "search_q":"[def]",
-        "camera_type":""
+        "search_q":"Server: yawcam",
+        "camera_type":"yawcam"
     }
 }

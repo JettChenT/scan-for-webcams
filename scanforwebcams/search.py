@@ -10,11 +10,14 @@ from clarifai.rest import ClarifaiApp
 from halo import Halo
 from dotenv import load_dotenv
 from pathlib import Path
+from datetime import datetime
+import pytz
 
 class Scanner(object):
     def __init__(self):
         socket.setdefaulttimeout(5)
-        env_path = Path(".")/'.env'
+        directory = Path(__file__).parent
+        env_path = directory/'.env'
         load_dotenv(override=True, dotenv_path=env_path)
         self.SHODAN_API_KEY = os.getenv("SHODAN_API_KEY")
         if self.SHODAN_API_KEY == None:
@@ -22,10 +25,10 @@ class Scanner(object):
         self.api = shodan.Shodan(self.SHODAN_API_KEY)  
         # preset url schemes
         self.clarifai_initialized = False
-        with open("cams.json") as f:
+        with open(directory/'cams.json') as f:
             self.config = json.load(f)
 
-    def init_clarifai(self):
+    def init_clarifai(self):    
         self.CLARIFAI_API_KEY = os.getenv("CLARIFAI_API_KEY")
         if self.CLARIFAI_API_KEY == None:
             raise KeyError("Clarifai API key not found in environ")
@@ -47,7 +50,8 @@ class Scanner(object):
             return False
         return True
 
-    def scan(self, camera_type, url_scheme = '', check_empty_url='',check_empty = True, tag=True, search_q="webcams"):
+    def scan(self, camera_type, url_scheme = '', check_empty_url='',check_empty = True, tag=True, search_q="webcams", loc=True):
+        print(f"loc:{loc}, check_empty:{check_empty}, tag:{tag}")
         if url_scheme == '':
             url_scheme = self.config['default']['url_scheme']
         if self.SHODAN_API_KEY == '':
@@ -92,6 +96,14 @@ class Scanner(object):
                             print("[red]webcam is empty[/red]")
                             spinner.close()
                             continue
+                    if loc:
+                        host = self.api.host(result['ip_str'])
+                        country_name = host['country_name']
+                        country_code = host['country_code']
+                        tz = pytz.timezone(country_code)
+                        dt = datetime.now(tz)
+                        ns = dt.strftime('%H:%M')
+                        print(f"{country_name} {ns}")
                     if tag:
                         tags = self.tag_image(check_empty_url.format(url=url))
                         for t in tags:
@@ -101,18 +113,15 @@ class Scanner(object):
                         print()
                         store[-1]["tags"] = tags
                     spinner.close()
-                else:
-                    print("[red]webcam not avaliable[/red]")
             except KeyboardInterrupt:
                 print("[red]terminating...")
                 break
             except:
-                print("[red]webcam not avaliable[/red]")
                 continue
         return store
 
-    def scan_preset(self,preset,check,tag):
-        if not self.config.has_key(preset):
+    def scan_preset(self,preset,check,tag,loc):
+        if preset not in self.config:
             raise KeyError("The preset entered doesn't exist")
         for key in self.config[preset]:
             if self.config[preset][key] == '[def]':
@@ -120,4 +129,5 @@ class Scanner(object):
         config = self.config[preset]
         config['check_empty'] = check
         config['tag'] = tag
+        config['loc'] = loc
         self.scan(**config)
