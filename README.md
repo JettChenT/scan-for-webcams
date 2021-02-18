@@ -46,4 +46,4 @@ And then you can run the program!
 
 ## Demo
 
-[![asciicast](https://asciinema.org/a/366018.svg)](https://asciinema.org/a/366018)
+[![asciicast](https://asciinema.org/a/8z3dbl4Rzc7gcFVom7IWOEoRn.svg)](https://asciinema.org/a/8z3dbl4Rzc7gcFVom7IWOEoRn)
