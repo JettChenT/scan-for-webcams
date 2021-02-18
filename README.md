@@ -34,10 +34,13 @@ If your terminal supports links, click the link and open it in your browser, oth
 
 3. set up clarifai:
    go to [clarifai.com](https://clarifai.com), register/log in, create an application and grab your API key
+
+4. setup geoip:
+   go to [geo.ipify.org](https://geo.ipify.org), register/log in and grab your API key
    
-4. Add API keys:
+5. Add API keys:
    1. run `sfw setup`
-   2. enter your shodan and clarifai API keys
+   2. enter your shodan, clarifai and geoip API keys
 
 And then you can run the program!
 

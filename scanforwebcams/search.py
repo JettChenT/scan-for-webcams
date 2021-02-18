@@ -11,8 +11,7 @@ from halo import Halo
 from dotenv import load_dotenv
 from pathlib import Path
 from datetime import datetime
-import pytz
-
+from .geoip import Locater
 
 class Scanner(object):
     def __init__(self):
@@ -26,6 +25,7 @@ class Scanner(object):
         self.api = shodan.Shodan(self.SHODAN_API_KEY)
         # preset url schemes
         self.clarifai_initialized = False
+        self.geoip_initialized = False
         with open(directory / "cams.json") as f:
             self.config = json.load(f)
 
@@ -36,6 +36,13 @@ class Scanner(object):
         self.clarifai_app = ClarifaiApp(api_key=self.CLARIFAI_API_KEY)
         self.clarifai_model = self.clarifai_app.public_models.general_model
         self.clarifai_initialized = True
+
+    def init_geoip(self):
+        self.GEOIP_API_KEY = os.getenv("GEOIP_API_KEY")
+        if self.GEOIP_API_KEY == None:
+            raise KeyError("Geoip API key not found in environ")
+        self.locator = Locater(self.GEOIP_API_KEY)
+        self.geoip_initialized = True
 
     def tag_image(self, url):
         response = self.clarifai_model.predict_by_url(url=url)
@@ -54,16 +61,16 @@ class Scanner(object):
         return True
 
     def scan(
-        self,
-        camera_type,
-        url_scheme="",
-        check_empty_url="",
-        check_empty=True,
-        tag=True,
-        search_q="webcams",
-        loc=True,
+            self,
+            camera_type,
+            url_scheme="",
+            check_empty_url="",
+            check_empty=True,
+            tag=True,
+            geoip=True,
+            search_q="webcams"
     ):
-        print(f"loc:{loc}, check_empty:{check_empty}, tag:{tag}")
+        print(f"loc:{geoip}, check_empty:{check_empty}, tag:{tag}")
         if url_scheme == "":
             url_scheme = self.config["default"]["url_scheme"]
         if self.SHODAN_API_KEY == "":
@@ -73,6 +80,8 @@ class Scanner(object):
         spinner.start()
         if tag and (not self.clarifai_initialized):
             self.init_clarifai()
+        if geoip and (not self.geoip_initialized):
+            self.init_geoip()
         try:
             results = self.api.search(search_q)
             spinner.succeed("Done")
@@ -93,7 +102,7 @@ class Scanner(object):
             try:
                 r = requests.get(url, timeout=5)
                 if r.status_code == 200:
-                    if check_empty == False:
+                    if not check_empty:
                         print(
                             url_scheme.format(ip=result["ip_str"], port=result["port"])
                         )
@@ -110,14 +119,11 @@ class Scanner(object):
                             print("[red]webcam is empty[/red]")
                             spinner.close()
                             continue
-                    if loc:
-                        host = self.api.host(result["ip_str"])
-                        country_name = host["country_name"]
-                        country_code = host["country_code"]
-                        tz = pytz.timezone(country_code)
-                        dt = datetime.now(tz)
-                        ns = dt.strftime("%H:%M")
-                        print(f"{country_name} {ns}")
+                    if geoip:
+                        country, region, hour, minute = self.locator.locate(result["ip_str"])
+                        print(f"[green]{country} , {region} {hour}:{minute}[/green]")
+                        store[-1]["country"] = country
+                        store[-1]["region"] = region
                     if tag:
                         tags = self.tag_image(check_empty_url.format(url=url))
                         for t in tags:
@@ -143,5 +149,5 @@ class Scanner(object):
         config = self.config[preset]
         config["check_empty"] = check
         config["tag"] = tag
-        config["loc"] = loc
+        config["geoip"] = loc
         self.scan(**config)
