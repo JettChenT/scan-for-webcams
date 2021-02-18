@@ -46,8 +46,8 @@ class Locater:
             t = self.cache[ip]
             country = t['country']
             region = t['region']
-            hour = t['hour']
-            minute = t['minute']
+            timeZone = t['timezone']
+            hour, minute = get_time(timeZone)
         else:
             data = dict()
             data['apiKey'] = self.api_key
@@ -61,8 +61,7 @@ class Locater:
             hour, minute = get_time(timeZone)
             self.cache[ip] = dict()
             self.cache[ip]['country'] = country
-            self.cache[ip]['hour'] = hour
             self.cache[ip]['region'] = region
-            self.cache[ip]['minute'] = minute
+            self.cache[ip]['timezone'] = timeZone
             self.store_cache()
         return country, region, hour, minute
