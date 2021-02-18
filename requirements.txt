@@ -6,3 +6,4 @@ clarifai==2.6.2
 halo == 0.0.31
 fire==0.3.1
 python-dotenv==0.15.0
+pycountry==20.7.3

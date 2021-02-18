@@ -4,6 +4,7 @@ import requests
 import socket
 import urllib
 import json
+import random
 from PIL import Image, ImageEnhance
 from rich import print
 from clarifai.rest import ClarifaiApp
@@ -121,7 +122,7 @@ class Scanner(object):
                             continue
                     if geoip:
                         country, region, hour, minute = self.locator.locate(result["ip_str"])
-                        print(f"[green]{country} , {region} {hour}:{minute}[/green]")
+                        print(f":earth_asia:[green]{country} , {region} {hour}:{minute}[/green]")
                         store[-1]["country"] = country
                         store[-1]["region"] = region
                     if tag:

@@ -1,5 +1,6 @@
 import requests
 from datetime import datetime, timedelta, timezone
+from pycountry import countries
 from pathlib import Path
 import json
 
@@ -19,6 +20,8 @@ def get_time(tzstr):
     curTime = datetime.now(tz=timeZone)
     return curTime.hour, curTime.minute
 
+def get_country_name(country):
+    return countries.get(alpha_2=country).name
 
 class Locater:
     def __init__(self, api_key):
@@ -64,4 +67,4 @@ class Locater:
             self.cache[ip]['region'] = region
             self.cache[ip]['timezone'] = timeZone
             self.store_cache()
-        return country, region, hour, minute
+        return get_country_name(country), region, hour, minute
