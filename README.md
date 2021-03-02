@@ -2,6 +2,10 @@
 
 ![scan-for-webcamBanner](./.github/scan-for-webcamBanner.png)
 
+![Discord](https://img.shields.io/discord/816286676653178881?label=discord&style=flat-square)
+![PyPI - License](https://img.shields.io/pypi/l/scan-for-webcams?style=flat-square)
+![PyPI](https://img.shields.io/pypi/v/scan-for-webcams?style=flat-square)
+
 [中文文档](/zh/README.md)
 
 ## Table of contents
