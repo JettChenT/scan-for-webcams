@@ -7,7 +7,7 @@ if version<(3,6):
     print("scan-for-webcams require python version >= 3.6")
     print("{}.{} detected".format(*version))
     sys.exit(-1)
-VERSION = "1.4.1"
+VERSION = "1.4.3"
 reqs = ['shodan','requests','rich','pillow','clarifai','halo','fire','python-dotenv','pycountry']
 
 with open("README.md", "r") as fh: 

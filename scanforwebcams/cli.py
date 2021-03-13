@@ -27,14 +27,15 @@ class CLI:
     def status(self):
         print("Status [green]OK[/green]!")
 
-    def search(self, preset, check=True, tag=True, store=False, loc=True):
+    def search(self, preset, check=True, tag=True, store=False, loc=True, debug=False):
         """
         :param preset: string, the type of pre written camera you want. choose from: 1)"webcamXP" 2)"MJPG 3)"yawCam"
         :param check: boolean, indicates whether or not you want to check if the image is completly black or white.
         :param tag: boolean, indicates whether or not you want to generate descriptions for the webcam.
+        :param debug: boolean, indicates whether or not you want to print debug info.
         """
         self.init_scanner()
-        self.scanner.scan_preset(preset, check, tag, loc)
+        self.scanner.scan_preset(preset, check, tag, loc, debug=debug)
 
     def search_custom(
         self,
@@ -45,6 +46,7 @@ class CLI:
         tag=True,
         loc=True,
         search_q="webcams",
+        debug=False
     ):
         """
         :param camera_type: string, the type of camera. this string must appear in the data returned by shodan
@@ -53,6 +55,7 @@ class CLI:
         :param check_empty: boolean, indicates whether or not you want to check if the image is completly black or white
         :param tag: boolean, indicates whether or not you want to generate descriptions for the image
         :param search_q: string, the term to search for in shodan
+        :param debug: boolean, indicates whether or not you want to print debug info.
         """
         self.init_scanner()
         self.scanner.scan(
@@ -62,7 +65,8 @@ class CLI:
             check_empty=check_empty,
             tag=tag,
             search_q=search_q,
-            loc=loc
+            loc=loc,
+            debug=debug
         )
 
     def show_environ(self):

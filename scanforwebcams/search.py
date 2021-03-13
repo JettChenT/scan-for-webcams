@@ -1,4 +1,5 @@
 import os
+import sys
 import shodan
 import requests
 import socket
@@ -13,6 +14,11 @@ from dotenv import load_dotenv
 from pathlib import Path
 from datetime import datetime
 from .geoip import Locater
+
+def handle():
+    err = sys.exc_info()[0]
+    print("[red]ERROR:[/red]")
+    print(err)
 
 class Scanner(object):
     def __init__(self):
@@ -69,7 +75,8 @@ class Scanner(object):
             check_empty=True,
             tag=True,
             geoip=True,
-            search_q="webcams"
+            search_q="webcams",
+            debug=False
     ):
         print(f"loc:{geoip}, check_empty:{check_empty}, tag:{tag}")
         if url_scheme == "":
@@ -88,6 +95,8 @@ class Scanner(object):
             spinner.succeed("Done")
         except:
             spinner.fail("Get data from API failed")
+            if debug:
+                handle()
             return
         max_time = len(results["matches"]) * 10
         print(f"maximum time: {max_time} seconds")
@@ -138,10 +147,12 @@ class Scanner(object):
                 print("[red]terminating...")
                 break
             except:
+                if debug:
+                    handle()
                 continue
         return store
 
-    def scan_preset(self, preset, check, tag, loc):
+    def scan_preset(self, preset, check, tag, loc,debug=False):
         if preset not in self.config:
             raise KeyError("The preset entered doesn't exist")
         for key in self.config[preset]:
@@ -151,4 +162,5 @@ class Scanner(object):
         config["check_empty"] = check
         config["tag"] = tag
         config["geoip"] = loc
+        config['debug'] = debug
         self.scan(**config)
