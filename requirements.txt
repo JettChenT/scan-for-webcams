@@ -5,5 +5,5 @@ pillow==8.1.2
 clarifai==2.6.2
 halo == 0.0.31
 fire==0.4.0
-python-dotenv==0.15.0
+python-dotenv==0.17.1
 pycountry==20.7.3
