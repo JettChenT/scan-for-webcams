@@ -8,12 +8,12 @@ import json
 import random
 from PIL import Image, ImageEnhance
 from rich import print
-from clarifai.rest import ClarifaiApp
 from halo import Halo
 from dotenv import load_dotenv
 from pathlib import Path
 from datetime import datetime
 from .geoip import Locater
+from .crfi import Clarifai
 
 def handle():
     err = sys.exc_info()[0]
@@ -40,8 +40,7 @@ class Scanner(object):
         self.CLARIFAI_API_KEY = os.getenv("CLARIFAI_API_KEY")
         if self.CLARIFAI_API_KEY == None:
             raise KeyError("Clarifai API key not found in environ")
-        self.clarifai_app = ClarifaiApp(api_key=self.CLARIFAI_API_KEY)
-        self.clarifai_model = self.clarifai_app.public_models.general_model
+        self.clarifai = Clarifai(self.CLARIFAI_API_KEY)
         self.clarifai_initialized = True
 
     def init_geoip(self):
@@ -52,11 +51,8 @@ class Scanner(object):
         self.geoip_initialized = True
 
     def tag_image(self, url):
-        response = self.clarifai_model.predict_by_url(url=url)
-        results = [
-            concept["name"] for concept in response["outputs"][0]["data"]["concepts"]
-        ]
-        return results
+        concepts = self.clarifai.get_concepts(url)
+        return concepts
 
     def check_empty(self, image_source, tolerance=5) -> bool:
         im_loc = ".tmpimage"
