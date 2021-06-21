@@ -1,6 +1,6 @@
 shodan==1.25.0
 requests==2.25.1
-rich==10.3.0
+rich==10.4.0
 pillow==8.2.0
 halo == 0.0.31
 fire==0.4.0
