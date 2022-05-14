@@ -1,4 +1,5 @@
 import os
+import traceback
 import sys
 import shodan
 import requests
@@ -12,13 +13,14 @@ from halo import Halo
 from dotenv import load_dotenv
 from pathlib import Path
 from datetime import datetime
-from .geoip import Locater
-from .crfi import Clarifai
+from geoip import Locater
+from crfi import Clarifai
 
 def handle():
     err = sys.exc_info()[0]
     print("[red]ERROR:[/red]")
     print(err)
+    print(traceback.format_exc())
 
 class Scanner(object):
     def __init__(self):
@@ -33,6 +35,7 @@ class Scanner(object):
         # preset url schemes
         self.clarifai_initialized = False
         self.geoip_initialized = False
+        self.cli = True
         with open(directory / "cams.json") as f:
             self.config = json.load(f)
 
@@ -62,6 +65,10 @@ class Scanner(object):
         if abs(extrema[0] - extrema[1]) <= tolerance:
             return False
         return True
+
+    def output(self, *args, **kwargs):
+        if(self.cli):
+            print(*args, **kwargs)
 
     def scan(
             self,
@@ -109,44 +116,46 @@ class Scanner(object):
                 r = requests.get(url, timeout=5)
                 if r.status_code == 200:
                     if not check_empty:
-                        print(
+                        self.output(
                             url_scheme.format(ip=result["ip_str"], port=result["port"])
                         )
                     else:
                         is_empty = self.check_empty(check_empty_url.format(url=url))
                         if is_empty:
                             store.append(result)
-                            print(
+                            self.output(
                                 url_scheme.format(
                                     ip=result["ip_str"], port=result["port"]
                                 )
                             )
                         else:
-                            print("[red]webcam is empty[/red]")
                             spinner.close()
                             continue
                     if geoip:
                         country, region, hour, minute = self.locator.locate(result["ip_str"])
-                        print(f":earth_asia:[green]{country} , {region} {hour}:{minute}[/green]")
+                        self.output(f":earth_asia:[green]{country} , {region} {hour}:{minute}[/green]")
                         store[-1]["country"] = country
                         store[-1]["region"] = region
                     if tag:
                         tags = self.tag_image(check_empty_url.format(url=url))
                         for t in tags:
-                            print(f"|[green]{t}[/green]|", end=" ")
+                            self.output(f"|[green]{t}[/green]|", end=" ")
                         if len(tags) == 0:
-                            print("[i green]no description[i green]", end="")
+                            self.output("[i green]no description[i green]", end="")
                         print()
                         store[-1]["tags"] = tags
-                    spinner.close()
+                    # spinner.close()
             except KeyboardInterrupt:
                 print("[red]terminating...")
                 break
             except:
                 if debug:
                     handle()
-                continue
-        return store
+                else:
+                    continue
+
+    def testfunc(self, **kwargs):
+        print(kwargs)
 
     def scan_preset(self, preset, check, tag, loc,debug=False):
         if preset not in self.config:
@@ -159,4 +168,6 @@ class Scanner(object):
         config["tag"] = tag
         config["geoip"] = loc
         config['debug'] = debug
+        print('beginning scan...')
         self.scan(**config)
+        print('scan finished')

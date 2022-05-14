@@ -1,4 +1,4 @@
-from .search import Scanner
+from search import Scanner
 import fire
 from rich import print
 from pathlib import Path
@@ -14,6 +14,7 @@ class CLI:
             print("[red] API key not found")
             print("Please set up first:")
             self.setup()
+            self.init_scanner()
 
     def setup(self):
         SHODAN_API_KEY = input("Please enter your SHODAN API KEY:")

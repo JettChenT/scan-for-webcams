@@ -1,5 +1,5 @@
 import fire
-from .cli import CLI
+from cli import CLI
 
 
 def Main():
