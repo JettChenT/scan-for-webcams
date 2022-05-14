@@ -3,7 +3,7 @@
 ![scan-for-webcamBanner](./.github/scan-for-webcamBanner.png)
 
 ![PyPI - License](https://img.shields.io/pypi/l/scan-for-webcams?style=flat-square)
-![PyPI](https://img.shields.io/pypi/v/scan-for-webcams?style=flat-square)
+[![Discord server invite](https://discordapp.com/api/guilds/974876463797006356/embed.png)](https://discord.gg/JCepvsHNqW)
 
 [中文文档](/zh/README.md)
 
@@ -11,8 +11,10 @@
 I switched to a new method of [installing](#Installation) this program 
 for a better developer experience and better modifiability.
 
-As result, the PYPI package `scan-for-webcams` is not maintained anymore, and 
+As a result, the PYPI package `scan-for-webcams` is not maintained anymore, and 
 should be considered deprecated.
+
+btw: we have a discord channel ! [join](https://discord.gg/JCepvsHNqW)
 
 ## Table of contents
 
