@@ -1,7 +1,7 @@
 shodan==1.27.0
 requests==2.27.1
 rich==12.4.4
-pillow==9.1.0
+pillow==9.1.1
 halo == 0.0.31
 fire==0.4.0
 python-dotenv==0.20.0
