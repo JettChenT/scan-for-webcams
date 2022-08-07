@@ -1,4 +1,4 @@
-shodan==1.27.0
+shodan==1.28.0
 requests==2.27.1
 rich==12.5.1
 pillow==9.1.0
