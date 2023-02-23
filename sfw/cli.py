@@ -28,15 +28,16 @@ class CLI:
     def status(self):
         print("Status [green]OK[/green]!")
 
-    def search(self, preset, check=True, tag=True, store=False, loc=True, debug=False):
+    def search(self, preset, check=True, tag=True, store=False, loc=True, places=False, debug=False):
         """
         :param preset: string, the type of pre written camera you want. choose from: 1)"webcamXP" 2)"MJPG 3)"yawCam"
         :param check: boolean, indicates whether or not you want to check if the image is completly black or white.
         :param tag: boolean, indicates whether or not you want to generate descriptions for the webcam.
+        :param places: boolean, indicates whether or not you want to generate descriptions for the webcam with the "places" model.
         :param debug: boolean, indicates whether or not you want to print debug info.
         """
         self.init_scanner()
-        self.scanner.scan_preset(preset, check, tag, loc, debug=debug)
+        self.scanner.scan_preset(preset, check, tag, loc,places, debug=debug)
 
     def search_custom(
         self,
@@ -46,6 +47,7 @@ class CLI:
         check_empty=True,
         tag=True,
         loc=True,
+        places=False,
         search_q="webcams",
         debug=False
     ):
@@ -67,6 +69,7 @@ class CLI:
             tag=tag,
             search_q=search_q,
             loc=loc,
+            places=places,
             debug=debug
         )
 

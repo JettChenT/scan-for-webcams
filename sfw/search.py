@@ -3,6 +3,7 @@ import traceback
 import sys
 import shodan
 import requests
+import warnings
 import socket
 import urllib
 import json
@@ -33,8 +34,7 @@ class Scanner(object):
             raise KeyError("Shodan API key not found in envrion")
         self.api = shodan.Shodan(self.SHODAN_API_KEY)
         # preset url schemes
-        self.clarifai_initialized = False
-        self.geoip_initialized = False
+        self.clarifai = self.locator = self.places = None
         self.cli = True
         with open(directory / "cams.json") as f:
             self.config = json.load(f)
@@ -44,14 +44,23 @@ class Scanner(object):
         if self.CLARIFAI_API_KEY == None:
             raise KeyError("Clarifai API key not found in environ")
         self.clarifai = Clarifai(self.CLARIFAI_API_KEY)
-        self.clarifai_initialized = True
 
     def init_geoip(self):
         self.GEOIP_API_KEY = os.getenv("GEOIP_API_KEY")
         if self.GEOIP_API_KEY == None:
             raise KeyError("Geoip API key not found in environ")
         self.locator = Locater(self.GEOIP_API_KEY)
-        self.geoip_initialized = True
+
+    def init_places(self):
+        try:
+            from places_mod import Places
+            self.places = Places()
+        except ImportError as e:
+            warnings.warn("Please make sure you have torch and torchvision installed to use this feature")
+            raise e
+        except Exception as e:
+            print(f"Unexpected Error: {e}")
+
 
     def tag_image(self, url):
         concepts = self.clarifai.get_concepts(url)
@@ -78,6 +87,7 @@ class Scanner(object):
             check_empty=True,
             tag=True,
             geoip=True,
+            places=False,
             search_q="webcams",
             debug=False
     ):
@@ -87,17 +97,22 @@ class Scanner(object):
         if self.SHODAN_API_KEY == "":
             print("[red]Please set up shodan API key in environ![/red]")
             return
+        spinner = Halo(text="Initializing...", spinner="dots")
+        spinner.start()
+        if tag and (self.clarifai is None):
+            self.init_clarifai()
+        if geoip and (self.locator is None):
+            self.init_geoip()
+        if places and (self.places is None):
+            self.init_places()
+        spinner.succeed()
         spinner = Halo(text="Looking for possible servers...", spinner="dots")
         spinner.start()
-        if tag and (not self.clarifai_initialized):
-            self.init_clarifai()
-        if geoip and (not self.geoip_initialized):
-            self.init_geoip()
         try:
             results = self.api.search(search_q)
             spinner.succeed("Done")
-        except:
-            spinner.fail("Get data from API failed")
+        except Exception as e:
+            spinner.fail(f"Get data from API failed: {e}")
             if debug:
                 handle()
             return
@@ -144,6 +159,12 @@ class Scanner(object):
                             self.output("[i green]no description[i green]", end="")
                         print()
                         store[-1]["tags"] = tags
+                    if places:
+                        if self.check_empty(check_empty_url.format(url=url)):
+                            self.output(self.places.output(".tmpimage"))
+                        else:
+                            self.output("[i red]footage is empty, skipping places[/i red]")
+
                     # spinner.close()
             except KeyboardInterrupt:
                 print("[red]terminating...")
@@ -157,7 +178,7 @@ class Scanner(object):
     def testfunc(self, **kwargs):
         print(kwargs)
 
-    def scan_preset(self, preset, check, tag, loc,debug=False):
+    def scan_preset(self, preset, check, tag,places, loc,debug=False):
         if preset not in self.config:
             raise KeyError("The preset entered doesn't exist")
         for key in self.config[preset]:
@@ -168,6 +189,7 @@ class Scanner(object):
         config["tag"] = tag
         config["geoip"] = loc
         config['debug'] = debug
+        config['places'] = places
         print('beginning scan...')
         self.scan(**config)
         print('scan finished')
