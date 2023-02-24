@@ -4,6 +4,6 @@ pillow==9.4.0
 rich==13.3.1
 halo == 0.0.31
 fire==0.5.0
-python-dotenv==0.21.1
+python-dotenv==1.0.0
 pycountry==22.3.5
 clarifai_grpc==8.8.0
