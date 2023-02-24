@@ -133,4 +133,4 @@ shodan-api-key.env
 .idea/
 .tmpimage
 tmp/
-.env
+**/.env

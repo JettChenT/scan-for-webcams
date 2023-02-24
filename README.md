@@ -20,6 +20,7 @@ btw: we have a discord channel ! [join](https://discord.gg/JCepvsHNqW)
 
 - [Usage](#Usage)
 - [Installation](#Installation)
+- [Places365: On device model](#places365-on-device-footage-classification)
 - [Demo](#Demo)
 
 ## Usage
@@ -45,7 +46,8 @@ If your terminal supports links, click the link and open it in your browser, oth
    go to [shodan.io](https://shodan.io), register/log in and grab your API key
 
 4. set up clarifai:
-   go to [clarifai.com](https://clarifai.com), register/log in, create an application and grab your API key
+   go to [clarifai.com](https://clarifai.com), register/log in, create an application and grab your API key.
+   Alternatively, use the [places365](#places365-on-device-footage-classification) model.
 
 5. setup geoip:
    go to [geo.ipify.org](https://geo.ipify.org), register/log in and grab your API key
@@ -55,6 +57,23 @@ If your terminal supports links, click the link and open it in your browser, oth
    2. enter your shodan, clarifai and geoip API keys
 
 And then you can [run](#Usage) the program!
+
+## Places365: On device footage classification
+It is now possible to run [the Places365 model](https://github.com/CSAILVision/places365),
+a model fined tuned for real world locations,
+to get information about webcam footage.
+
+To use this model, you need to install the following packages:
+```bash
+pip install torch torchvision
+```
+
+Then, you can run the program with the `--places` flag:
+```
+python sfw search MJPG --tag=False --places
+```
+
+The model will take some time to download, and will be cached for future use.
 
 ## Demo
 
