@@ -6,4 +6,4 @@ halo == 0.0.31
 fire==0.5.0
 python-dotenv==0.21.1
 pycountry==22.3.5
-clarifai_grpc==8.8.0
+clarifai_grpc==9.3.0
