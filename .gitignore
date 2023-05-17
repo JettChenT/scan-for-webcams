@@ -134,3 +134,7 @@ shodan-api-key.env
 .tmpimage
 tmp/
 **/.env
+geoip_cache.json
+.tst/
+sfw/places
+bak.env
