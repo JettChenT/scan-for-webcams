@@ -2,17 +2,12 @@
 
 import torch
 from torch.autograd import Variable as V
-import torchvision.models as models
 from torchvision import transforms as trn
 from torch.nn import functional as F
-from tqdm import tqdm
 import os
 import numpy as np
 import cv2
 from PIL import Image
-import pickle
-from rich import print
-import requests
 
 MODEL_DIR = os.path.join(os.path.dirname(os.path.realpath(__file__)), 'places')
 
@@ -130,7 +125,7 @@ def load_model(hook_feature):
 
     # hacky way to deal with the upgraded batchnorm2D and avgpool layers...
     for i, (name, module) in enumerate(model._modules.items()):
-        module = recursion_change_bn(model)
+        recursion_change_bn(model)
     model.avgpool = torch.nn.AvgPool2d(kernel_size=14, stride=1, padding=0)
     model.eval()
     # hook the feature extractor

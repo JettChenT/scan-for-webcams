@@ -7,13 +7,11 @@ import warnings
 import socket
 import urllib
 import json
-import random
-from PIL import Image, ImageEnhance
+from PIL import Image
 from rich import print
 from halo import Halo
 from dotenv import load_dotenv
 from pathlib import Path
-from datetime import datetime
 from geoip import Locater
 from crfi import Clarifai
 
@@ -30,7 +28,7 @@ class Scanner(object):
         env_path = directory / ".env"
         load_dotenv(override=True, dotenv_path=env_path)
         self.SHODAN_API_KEY = os.getenv("SHODAN_API_KEY")
-        if self.SHODAN_API_KEY == None:
+        if self.SHODAN_API_KEY is None:
             raise KeyError("Shodan API key not found in envrion")
         self.api = shodan.Shodan(self.SHODAN_API_KEY)
         # preset url schemes
@@ -41,13 +39,13 @@ class Scanner(object):
 
     def init_clarifai(self):
         self.CLARIFAI_API_KEY = os.getenv("CLARIFAI_API_KEY")
-        if self.CLARIFAI_API_KEY == None:
+        if self.CLARIFAI_API_KEY is None:
             raise KeyError("Clarifai API key not found in environ")
         self.clarifai = Clarifai(self.CLARIFAI_API_KEY)
 
     def init_geoip(self):
         self.GEOIP_API_KEY = os.getenv("GEOIP_API_KEY")
-        if self.GEOIP_API_KEY == None:
+        if self.GEOIP_API_KEY is None:
             raise KeyError("Geoip API key not found in environ")
         self.locator = Locater(self.GEOIP_API_KEY)
 
