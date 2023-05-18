@@ -2,10 +2,8 @@ import os
 import traceback
 import sys
 import shodan
-import requests
 import warnings
 import socket
-import urllib
 import json
 from PIL import Image
 from rich import print
@@ -14,6 +12,7 @@ from dotenv import load_dotenv
 from pathlib import Path
 from geoip import Locater
 from crfi import Clarifai
+from cam import get_cam, CameraEntry, Camera
 
 def handle():
     err = sys.exc_info()[0]
@@ -59,15 +58,11 @@ class Scanner(object):
         except Exception as e:
             print(f"Unexpected Error: {e}")
 
-
     def tag_image(self, url):
         concepts = self.clarifai.get_concepts(url)
         return concepts
 
-    def check_empty(self, image_source, tolerance=5) -> bool:
-        im_loc = ".tmpimage"
-        urllib.request.urlretrieve(image_source, im_loc)
-        im = Image.open(im_loc)
+    def check_empty(self, im: Image, tolerance=5) -> bool:
         extrema = im.convert("L").getextrema()
         if abs(extrema[0] - extrema[1]) <= tolerance:
             return False
@@ -79,19 +74,20 @@ class Scanner(object):
 
     def scan(
             self,
-            camera_type,
-            url_scheme="",
-            check_empty_url="",
+            cam: Camera,
             check_empty=True,
             tag=True,
             geoip=True,
             places=False,
-            search_q="webcams",
-            debug=False
+            debug=False,
+            add_query=""
     ):
-        print(f"loc:{geoip}, check_empty:{check_empty}, tag:{tag}")
-        if url_scheme == "":
-            url_scheme = self.config["default"]["url_scheme"]
+        print(f"loc:{geoip}, check_empty:{check_empty}, tag:{tag}, places:{places}")
+        query = cam.query + " " + add_query
+        if debug:
+            print(f"Searching for: {query}")
+        else:
+            os.environ["OPENCV_LOG_LEVEL"] = "OFF"
         if self.SHODAN_API_KEY == "":
             print("[red]Please set up shodan API key in environ![/red]")
             return
@@ -107,7 +103,7 @@ class Scanner(object):
         spinner = Halo(text="Looking for possible servers...", spinner="dots")
         spinner.start()
         try:
-            results = self.api.search(search_q)
+            results = self.api.search(query)
             spinner.succeed("Done")
         except Exception as e:
             spinner.fail(f"Get data from API failed: {e}")
@@ -118,28 +114,28 @@ class Scanner(object):
         print(f"maximum time: {max_time} seconds")
         camera_type_list = []
         for result in results["matches"]:
-            if camera_type in result["data"]:
+            if cam.camera_type is None or cam.camera_type in result["data"]:
                 camera_type_list.append(result)
         store = []
         cnt = 0
         for result in camera_type_list:
-            url = f"http://{result['ip_str']}:{result['port']}"
+            entry = CameraEntry(result['ip_str'], int(result['port']))
             cnt += 1
             try:
-                r = requests.get(url, timeout=5)
-                if r.status_code == 200:
+                if cam.check_accessible(entry):
                     if not check_empty:
+                        if(debug): print("not check empty")
                         self.output(
-                            url_scheme.format(ip=result["ip_str"], port=result["port"])
+                            cam.get_stream_url(entry)
                         )
                     else:
-                        is_empty = self.check_empty(check_empty_url.format(url=url))
+                        if(debug): print(f"checking...")    
+                        is_empty = self.check_empty(cam.get_image(entry))
+                        if(debug): print(f"check empty: {is_empty}")    
                         if is_empty:
                             store.append(result)
                             self.output(
-                                url_scheme.format(
-                                    ip=result["ip_str"], port=result["port"]
-                                )
+                                cam.get_stream_url(entry)
                             )
                         else:
                             spinner.close()
@@ -150,7 +146,7 @@ class Scanner(object):
                         store[-1]["country"] = country
                         store[-1]["region"] = region
                     if tag:
-                        tags = self.tag_image(check_empty_url.format(url=url))
+                        tags = self.tag_image(cam.get_image(entry))
                         for t in tags:
                             self.output(f"|[green]{t}[/green]|", end=" ")
                         if len(tags) == 0:
@@ -158,12 +154,10 @@ class Scanner(object):
                         print()
                         store[-1]["tags"] = tags
                     if places:
-                        if self.check_empty(check_empty_url.format(url=url)):
-                            self.output(self.places.output(".tmpimage"))
-                        else:
-                            self.output("[i red]footage is empty, skipping places[/i red]")
-
+                        im = cam.get_image(entry)
+                        self.output(self.places.output(im))
                     # spinner.close()
+                    print()
             except KeyboardInterrupt:
                 print("[red]terminating...")
                 break
@@ -176,18 +170,13 @@ class Scanner(object):
     def testfunc(self, **kwargs):
         print(kwargs)
 
-    def scan_preset(self, preset, check, tag,places, loc,debug=False):
+    def scan_preset(self, preset, check, tag,places, loc,debug=False, add_query=""):
         if preset not in self.config:
             raise KeyError("The preset entered doesn't exist")
         for key in self.config[preset]:
             if self.config[preset][key] == "[def]":
                 self.config[preset][key] = self.config["default"][key]
-        config = self.config[preset]
-        config["check_empty"] = check
-        config["tag"] = tag
-        config["geoip"] = loc
-        config['debug'] = debug
-        config['places'] = places
         print('beginning scan...')
-        self.scan(**config)
+        cam = get_cam(**self.config[preset])
+        self.scan(cam, check, tag, loc, places, debug, add_query)
         print('scan finished')

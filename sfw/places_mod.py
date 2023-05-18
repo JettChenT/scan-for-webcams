@@ -154,8 +154,7 @@ class Places:
     def hook_feature(self, module, input, output):
         self.features_blobs.append(np.squeeze(output.data.cpu().numpy()))
 
-    def extract(self, img_path):
-        img = Image.open(img_path)
+    def extract(self, img):
         # if image contains less than 3 channels, transform it to 3 channels
         if len(img.split()) < 3:
             img = img.convert('RGB')
@@ -172,8 +171,8 @@ class Places:
         self.features_blobs.clear()
         return probs, responses_attribute, idx
 
-    def output(self, img_path):
-        probs, responses_attribute, idx = self.extract(img_path)
+    def output(self, im):
+        probs, responses_attribute, idx = self.extract(im)
         io_image = np.mean(self.labels_IO[idx[:10]])  # vote for the indoor or outdoor
         io_typ = "indoor" if io_image < 0.5 else "outdoor"
         categories = [self.classes[idx[i]] for i in range(0, 5)]

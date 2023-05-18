@@ -27,16 +27,19 @@ class CLI:
     def status(self):
         print("Status [green]OK[/green]!")
 
-    def search(self, preset, check=True, tag=True, store=False, loc=True, places=False, debug=False):
+    def search(self, preset, check=True, tag=True, store=False, loc=True, places=False, debug=False, protocol=None, query=""):
         """
-        :param preset: string, the type of pre written camera you want. choose from: 1)"webcamXP" 2)"MJPG 3)"yawCam"
+        :param preset: string, the type of pre written camera you want. choose from: 1)"webcamXP" 2)"MJPG 3)"yawCam" 4) "rtsp"
         :param check: boolean, indicates whether or not you want to check if the image is completly black or white.
         :param tag: boolean, indicates whether or not you want to generate descriptions for the webcam.
+        :param store: boolean, indicates whether or not you want to store the images.
         :param places: boolean, indicates whether or not you want to generate descriptions for the webcam with the "places" model.
         :param debug: boolean, indicates whether or not you want to print debug info.
+        :param protocol: string, the protocol to use. choose from: 1)"http" 2)"rtsp"
+        :param query: string, additional query to add to the search, can be shodan filters or anything else.
         """
         self.init_scanner()
-        self.scanner.scan_preset(preset, check, tag, loc,places, debug=debug)
+        self.scanner.scan_preset(preset, check, tag, loc,places, debug, query)
 
     def search_custom(
         self,
