@@ -3,7 +3,7 @@ from rich import print
 from pathlib import Path
 from dotenv import load_dotenv
 import os
-
+import rtsp
 
 class CLI:
     def init_scanner(self):
@@ -85,3 +85,12 @@ class CLI:
         print(f"shodan api key:{shodan}")
         print(f"clarifai api key: {clarifai}")
         print(f"geoip api key: {geoip}")
+    
+    def play(self, url:str):
+        """
+        :param url: string, the url of the webcam
+        """
+        if url.startswith("rtsp"):
+            rtsp.play(url)
+        else:
+            os.system(f"open {url}")

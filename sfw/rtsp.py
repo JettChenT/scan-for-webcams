@@ -3,6 +3,7 @@ from enum import Enum
 from random import choices
 import logging
 import cv2
+import time
 
 def attack(ipaddr, port=554, dictionary = './rtsp_dict/tries.txt'):
     for trial in open(dictionary).readlines():
@@ -68,6 +69,7 @@ def play(rtsp_url, threshold=100):
             break
         except Exception as e:
             print(e)
+            time.sleep(0.05)
             fail_cnt+=1
     
     vid.release()

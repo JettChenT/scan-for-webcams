@@ -21,7 +21,7 @@ class Camera:
         self.query = query
         self.camera_type = camera_type
 
-    def get_stream_url(self, entry: CameraEntry) -> str | None:
+    def get_display_url(self, entry: CameraEntry) -> str | None:
         """Returns the displayed stream url"""
         pass
 
@@ -37,15 +37,15 @@ class WebCamera(Camera):
     def __init__(self,
                 capture_url:str,
                 query:str = "webcams",
-                stream_url_scheme: str = DEF_URL_SCHEME,
+                display_url_scheme: str = DEF_URL_SCHEME,
                 camera_type: str|None = None
                 ) -> None:
         super().__init__(query, camera_type)
         self.capture_url = capture_url
-        self.stream_url_scheme = stream_url_scheme
+        self.display_url_scheme = display_url_scheme
     
-    def get_stream_url(self, entry: CameraEntry) -> str:
-        return self.stream_url_scheme.format(ip=entry.ip, port=entry.port)
+    def get_display_url(self, entry: CameraEntry) -> str:
+        return self.display_url_scheme.format(ip=entry.ip, port=entry.port)
     
     def get_base_url(self, entry: CameraEntry) -> str:
         return f"http://{entry.ip}:{entry.port}"
@@ -68,7 +68,7 @@ class RTSPCamera(Camera):
         super().__init__(query, camera_type)
         self.stream_url_scheme = stream_url_scheme
     
-    def get_stream_url(self, entry: CameraEntry) -> str | None:
+    def get_display_url(self, entry: CameraEntry) -> str | None:
         if self.stream_url_scheme is None:
             stream_url = attack(entry.ip, entry.port)
         else:
@@ -79,14 +79,14 @@ class RTSPCamera(Camera):
     
     def get_image(self, entry: CameraEntry) -> Image:
         if entry.store.get("stream_url") is None:
-            self.get_stream_url(entry)
+            self.get_display_url(entry)
         res = capture(entry.store["stream_url"])
         if res is None:
             raise Exception("Failed to capture image")
         return Image.fromarray(res)
     
     def check_accessible(self, entry: CameraEntry) -> bool:
-        return self.get_stream_url(entry) is not None
+        return self.get_display_url(entry) is not None
 
 def get_cam(
         protocol: str|None = None, **kwargs) -> Camera:

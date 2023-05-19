@@ -82,7 +82,7 @@ class Scanner(object):
             debug=False,
             add_query=""
     ):
-        print(f"loc:{geoip}, check_empty:{check_empty}, tag:{tag}, places:{places}")
+        print(f"loc:{geoip}, check_empty:{check_empty}, clarifai:{tag}, places:{places}")
         query = cam.query + " " + add_query
         if debug:
             print(f"Searching for: {query}")
@@ -123,26 +123,27 @@ class Scanner(object):
             cnt += 1
             try:
                 if cam.check_accessible(entry):
+                    store.append({})
                     if not check_empty:
                         if(debug): print("not check empty")
                         self.output(
-                            cam.get_stream_url(entry)
+                            cam.get_display_url(entry)
                         )
                     else:
                         if(debug): print(f"checking...")    
                         is_empty = self.check_empty(cam.get_image(entry))
                         if(debug): print(f"check empty: {is_empty}")    
                         if is_empty:
-                            store.append(result)
+                            store[-1] = result
                             self.output(
-                                cam.get_stream_url(entry)
+                                cam.get_display_url(entry)
                             )
                         else:
                             spinner.close()
                             continue
                     if geoip:
                         country, region, hour, minute = self.locator.locate(result["ip_str"])
-                        self.output(f":earth_asia:[green]{country} , {region} {hour}:{minute}[/green]")
+                        self.output(f":earth_asia:[green]{country} , {region} {hour:02d}:{minute:02d}[/green]")
                         store[-1]["country"] = country
                         store[-1]["region"] = region
                     if tag:
