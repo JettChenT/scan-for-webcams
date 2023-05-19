@@ -167,6 +167,7 @@ class Scanner(object):
                     handle()
                 else:
                     continue
+        return store
 
     def testfunc(self, **kwargs):
         print(kwargs)
@@ -179,5 +180,6 @@ class Scanner(object):
                 self.config[preset][key] = self.config["default"][key]
         print('beginning scan...')
         cam = get_cam(**self.config[preset])
-        self.scan(cam, check, tag, loc, places, debug, add_query)
+        res = self.scan(cam, check, tag, loc, places, debug, add_query)
         print('scan finished')
+        return res

@@ -4,6 +4,7 @@ from pathlib import Path
 from dotenv import load_dotenv
 import os
 import rtsp
+import json
 
 class CLI:
     def init_scanner(self):
@@ -27,19 +28,21 @@ class CLI:
     def status(self):
         print("Status [green]OK[/green]!")
 
-    def search(self, preset, check=True, tag=True, store=False, loc=True, places=False, debug=False, protocol=None, query=""):
+    def search(self, preset, check=True, tag=True, store=None, loc=True, places=False, debug=False, protocol=None, query=""):
         """
         :param preset: string, the type of pre written camera you want. choose from: 1)"webcamXP" 2)"MJPG 3)"yawCam" 4) "rtsp"
         :param check: boolean, indicates whether or not you want to check if the image is completly black or white.
         :param tag: boolean, indicates whether or not you want to generate descriptions for the webcam.
-        :param store: boolean, indicates whether or not you want to store the images.
+        :param store: (optional)string, indicates the location where you want to save the results.
         :param places: boolean, indicates whether or not you want to generate descriptions for the webcam with the "places" model.
         :param debug: boolean, indicates whether or not you want to print debug info.
         :param protocol: string, the protocol to use. choose from: 1)"http" 2)"rtsp"
         :param query: string, additional query to add to the search, can be shodan filters or anything else.
         """
         self.init_scanner()
-        self.scanner.scan_preset(preset, check, tag, loc,places, debug, query)
+        res = self.scanner.scan_preset(preset, check, tag, loc,places, debug, query)
+        if store:
+            json.dump(res, open(store, 'r'))
 
     def search_custom(
         self,
@@ -50,6 +53,7 @@ class CLI:
         tag=True,
         loc=True,
         places=False,
+        store = False,
         search_q="webcams",
         debug=False
     ):
@@ -59,11 +63,12 @@ class CLI:
         :param check_empty_url: string, the format that leads to an image that could be downloaded
         :param check_empty: boolean, indicates whether or not you want to check if the image is completly black or white
         :param tag: boolean, indicates whether or not you want to generate descriptions for the image
+        :param store: (optional)string, indicates the location where you want to save the results.
         :param search_q: string, the term to search for in shodan
         :param debug: boolean, indicates whether or not you want to print debug info.
         """
         self.init_scanner()
-        self.scanner.scan(
+        res = self.scanner.scan(
             camera_type=camera_type,
             url_scheme=url_scheme,
             check_empty_url=check_empty_url,
@@ -74,6 +79,8 @@ class CLI:
             places=places,
             debug=debug
         )
+        if store:
+            json.dump(res, open(store, 'r'))
 
     def show_environ(self):
         directory = Path(__file__).parent
