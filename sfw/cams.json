@@ -1,22 +1,22 @@
 {
     "default":{
-        "url_scheme":"[link=http://{ip}:{port}]http://[i][green]{ip}[/green]:[red]{port}[/red][/link]",
+        "display_url_scheme":"[link=http://{ip}:{port}]http://[i][green]{ip}[/green]:[red]{port}[/red][/link]",
         "query":"webcams"
     },
     "webcamXP":{
-        "url_scheme":"[def]",
+        "display_url_scheme":"[def]",
         "capture_url":"{url}/cam_1.jpg",
         "query":"product:webcamXP",
         "camera_type":"webcamXP"
     },
     "MJPG":{
-        "url_scheme":"[link=http://{ip}:{port}/?action=stream][i]http://[green]{ip}[/green]:[red]{port}[/red][blue]/?action=stream[/blue][/link]",
+        "display_url_scheme":"[link=http://{ip}:{port}/?action=stream][i]http://[green]{ip}[/green]:[red]{port}[/red][blue]/?action=stream[/blue][/link]",
         "capture_url":"{url}/?action=snapshot",
         "query":"[def]",
         "camera_type":"MJPG-streamer"   
     },
     "yawCam":{
-        "url_scheme":"[def]",
+        "display_url_scheme":"[def]",
         "capture_url":"{url}/out.jpg",
         "query":"Server: yawcam Mime-Type: text/html",
         "camera_type":"yawcam"
