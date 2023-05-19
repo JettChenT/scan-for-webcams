@@ -18,10 +18,13 @@ btw: we have a discord channel ! [join](https://discord.gg/JCepvsHNqW)
 
 ## Table of contents
 
-- [Usage](#Usage)
-- [Installation](#Installation)
-- [Places365: On device model](#places365-on-device-footage-classification)
-- [Demo](#Demo)
+- [scan-for-webcams :camera:](#scan-for-webcams-camera)
+  - [Note](#note)
+  - [Table of contents](#table-of-contents)
+  - [Usage](#usage)
+  - [Installation](#installation)
+  - [Places365: On device footage classification](#places365-on-device-footage-classification)
+  - [Demo](#demo)
 
 ## Usage
 
@@ -31,7 +34,15 @@ btw: we have a discord channel ! [join](https://discord.gg/JCepvsHNqW)
 
 * `python sfw search yawCam`: for public [yawCam steamers](https://www.yawcam.com/)
 
-* ` python sfw search --help`: for more options and help
+* `python sfw search hipcam`: for public hipcam streamers
+
+* `python sfw search rtsp`: **DANGER** searches for rtsp servers on shodan, and performs enumeration on them to try and find streams
+
+* `python sfw search --help`: for more options and help
+
+* `python sfw play {url}`: plays the camera stream
+  * for `rtsp://` streams, sfw will play it in a GUI viewer (see `sfw/rtsp.py`)
+  * for all other streams, sfw will open it in the default browser.
 
 The program will output a list of links with the format of `ip_address:port`, and descriptions of the image beneath it.
 
@@ -47,7 +58,7 @@ If your terminal supports links, click the link and open it in your browser, oth
 
 4. set up clarifai:
    go to [clarifai.com](https://clarifai.com), register/log in, create an application and grab your API key.
-   Alternatively, use the [places365](#places365-on-device-footage-classification) model.
+   Alternatively, use the local [places365](#places365-on-device-footage-classification) model.
 
 5. setup geoip:
    go to [geo.ipify.org](https://geo.ipify.org), register/log in and grab your API key
@@ -65,7 +76,7 @@ to get information about webcam footage.
 
 To use this model, you need to install the following packages:
 ```bash
-pip install torch torchvision
+pip install -r requirements-places.txt
 ```
 
 Then, you can run the program with the `--places` flag:
