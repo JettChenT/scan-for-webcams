@@ -13,6 +13,7 @@ from pathlib import Path
 from geoip import Locater
 from crfi import Clarifai
 from cam import get_cam, CameraEntry, Camera
+import threading
 
 def handle():
     err = sys.exc_info()[0]
@@ -118,56 +119,60 @@ class Scanner(object):
                 camera_type_list.append(result)
         store = []
         cnt = 0
+        scanner_threads = []
+        stdout_lock = threading.Lock()
         for result in camera_type_list:
             entry = CameraEntry(result['ip_str'], int(result['port']))
-            cnt += 1
-            try:
-                if cam.check_accessible(entry):
-                    store.append({})
-                    if not check_empty:
-                        if(debug): print("not check empty")
-                        self.output(
+            t = threading.Thread(target=self.scan_one, args=(cam, entry, stdout_lock, check_empty, tag, geoip, places, debug))
+            t.start()
+            scanner_threads.append(t)
+        for t in scanner_threads:
+            t.join()
+        return store
+
+    def scan_one(self, cam:Camera, entry: CameraEntry, stdout_lock: threading.Lock, check_empty=True, tag=True, geoip=True, places=False, debug=False):
+        try:
+            res = ""
+            def output(*args):
+                nonlocal res
+                res += " ".join(args)
+                res += "\n"
+            if cam.check_accessible(entry):
+                if not check_empty:
+                    output(
+                        cam.get_display_url(entry)
+                    )
+                else:  
+                    is_empty = self.check_empty(cam.get_image(entry))
+                    if is_empty:
+                        output(
                             cam.get_display_url(entry)
                         )
                     else:
-                        if(debug): print(f"checking...")    
-                        is_empty = self.check_empty(cam.get_image(entry))
-                        if(debug): print(f"check empty: {is_empty}")    
-                        if is_empty:
-                            store[-1] = result
-                            self.output(
-                                cam.get_display_url(entry)
-                            )
-                        else:
-                            spinner.close()
-                            continue
-                    if geoip:
-                        country, region, hour, minute = self.locator.locate(result["ip_str"])
-                        self.output(f":earth_asia:[green]{country} , {region} {hour:02d}:{minute:02d}[/green]")
-                        store[-1]["country"] = country
-                        store[-1]["region"] = region
-                    if tag:
-                        tags = self.tag_image(cam.get_image(entry))
-                        for t in tags:
-                            self.output(f"|[green]{t}[/green]|", end=" ")
-                        if len(tags) == 0:
-                            self.output("[i green]no description[i green]", end="")
-                        print()
-                        store[-1]["tags"] = tags
-                    if places:
-                        im = cam.get_image(entry)
-                        self.output(self.places.output(im))
-                    # spinner.close()
-                    print()
-            except KeyboardInterrupt:
-                print("[red]terminating...")
-                break
-            except:
-                if debug:
-                    handle()
-                else:
-                    continue
-        return store
+                        return
+                if geoip:
+                    country, region, hour, minute = self.locator.locate(entry.ip)
+                    output(f":earth_asia:[green]{country} , {region} {hour:02d}:{minute:02d}[/green]")
+                if tag:
+                    tags = self.tag_image(cam.get_image(entry))
+                    for t in tags:
+                        output(f"|[green]{t}[/green]|", end=" ")
+                    if len(tags) == 0:
+                        output("[i green]no description[i green]", end="")
+                    output()
+                if places:
+                    im = cam.get_image(entry)
+                    output(self.places.output(im))
+                output()
+                with stdout_lock:
+                    print(res)
+        except KeyboardInterrupt:
+            print("[red]terminating...")
+        except:
+            if debug:
+                handle()
+            else:
+                return
 
     def testfunc(self, **kwargs):
         print(kwargs)
