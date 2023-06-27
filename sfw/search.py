@@ -81,9 +81,10 @@ class Scanner(object):
             geoip=True,
             places=False,
             debug=False,
+            parallel=True,
             add_query=""
     ):
-        print(f"loc:{geoip}, check_empty:{check_empty}, clarifai:{tag}, places:{places}")
+        print(f"loc:{geoip}, check_empty:{check_empty}, clarifai:{tag}, places:{places}, async:{parallel}")
         query = cam.query + " " + add_query
         if debug:
             print(f"Searching for: {query}")
@@ -123,9 +124,12 @@ class Scanner(object):
         stdout_lock = threading.Lock()
         for result in camera_type_list:
             entry = CameraEntry(result['ip_str'], int(result['port']))
-            t = threading.Thread(target=self.scan_one, args=(cam, entry, stdout_lock, check_empty, tag, geoip, places, debug))
-            t.start()
-            scanner_threads.append(t)
+            if parallel:
+                t = threading.Thread(target=self.scan_one, args=(cam, entry, stdout_lock, check_empty, tag, geoip, places, debug))
+                t.start()
+                scanner_threads.append(t)
+            else:
+                self.scan_one(cam, entry, stdout_lock, check_empty, tag, geoip, places, debug)
         for t in scanner_threads:
             t.join()
         return store
@@ -166,18 +170,14 @@ class Scanner(object):
                 output()
                 with stdout_lock:
                     print(res)
-        except KeyboardInterrupt:
-            print("[red]terminating...")
-        except:
+        except Exception as e:
             if debug:
-                handle()
-            else:
-                return
+                raise e
 
     def testfunc(self, **kwargs):
         print(kwargs)
 
-    def scan_preset(self, preset, check, tag,places, loc,debug=False, add_query=""):
+    def scan_preset(self, preset, check, tag,places, loc,debug=False, parallel=True, add_query=""):
         if preset not in self.config:
             raise KeyError("The preset entered doesn't exist")
         for key in self.config[preset]:
@@ -185,6 +185,6 @@ class Scanner(object):
                 self.config[preset][key] = self.config["default"][key]
         print('beginning scan...')
         cam = get_cam(**self.config[preset])
-        res = self.scan(cam, check, tag, loc, places, debug, add_query)
+        res = self.scan(cam, check, tag, loc, places, debug, parallel, add_query)
         print('scan finished')
         return res
