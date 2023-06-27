@@ -20,6 +20,7 @@ class Camera:
     def __init__(self, query:str, camera_type:str|None=None) -> None:
         self.query = query
         self.camera_type = camera_type
+        self.allow_parallel = True
 
     def get_display_url(self, entry: CameraEntry) -> str | None:
         """Returns the displayed stream url"""
@@ -67,6 +68,7 @@ class RTSPCamera(Camera):
                  ) -> None:
         super().__init__(query, camera_type)
         self.stream_url_scheme = stream_url_scheme
+        self.allow_parallel = False
     
     def get_display_url(self, entry: CameraEntry) -> str | None:
         if self.stream_url_scheme is None:
