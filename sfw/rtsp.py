@@ -70,3 +70,22 @@ def play(rtsp_url, threshold=100):
     
     vid.release()
     cv2.destroyAllWindows()
+
+def stream_frames(rtsp_url, threshold=100):
+    vid = cv2.VideoCapture(rtsp_url)
+    if not vid.isOpened():
+        print('rtsp url is not valid')
+        return
+    fail_cnt = 0
+    while(fail_cnt<threshold):
+        try:
+            _, frame = vid.read()
+            yield frame
+        except KeyboardInterrupt:
+            break
+        except Exception as e:
+            print(e)
+            time.sleep(0.05)
+            fail_cnt+=1
+    
+    vid.release()
