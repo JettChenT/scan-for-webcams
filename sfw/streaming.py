@@ -46,7 +46,9 @@ class StreamManager:
         return len(self.streamrecords)
 
     def add(self, sr: StreamRecord):
+        print(f"Adding {sr.camera_entry} to stream manager")
         self.streamrecords.append(sr)
+        print(f"Added, {len(self.streamrecords)} \n Starting stream for {sr.camera_entry}")
         self.streamData[sr.camera_entry] = None
         self.start_stream(sr)
     

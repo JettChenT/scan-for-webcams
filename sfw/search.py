@@ -87,6 +87,7 @@ class Scanner(object):
             stream_manager:None|StreamManager=None,
     ):
         print(f"loc:{geoip}, check_empty:{check_empty}, clarifai:{tag}, places:{places}, async:{parallel}")
+        print(stream_manager)
         query = cam.query + " " + add_query
         if debug:
             print(f"Searching for: {query}")
@@ -148,14 +149,14 @@ class Scanner(object):
                     output(
                         cam.get_display_url(entry)
                     )
-                    if stream_manager: stream_manager.add(StreamRecord(cam, entry))
+                    if stream_manager!=None: stream_manager.add(StreamRecord(cam, entry))
                 else:  
                     is_empty = self.check_empty(cam.get_image(entry))
                     if is_empty:
                         output(
                             cam.get_display_url(entry)
                         )
-                        if stream_manager: stream_manager.add(StreamRecord(cam, entry))
+                        if stream_manager!=None: stream_manager.add(StreamRecord(cam, entry))
                     else:
                         return
                 if geoip:
@@ -181,7 +182,7 @@ class Scanner(object):
     def testfunc(self, **kwargs):
         print(kwargs)
 
-    def scan_preset(self, preset, check, tag,places, loc,debug=False, parallel=True, add_query="", **kwargs):
+    def scan_preset(self, preset, check, tag,places, loc,debug=False, parallel=True, add_query="", stream_manager:None|StreamManager=None):
         if preset not in self.config:
             raise KeyError("The preset entered doesn't exist")
         for key in self.config[preset]:
@@ -189,6 +190,6 @@ class Scanner(object):
                 self.config[preset][key] = self.config["default"][key]
         print('beginning scan...')
         cam = get_cam(**self.config[preset])
-        res = self.scan(cam, check, tag, loc, places, debug, parallel, add_query, **kwargs)
+        res = self.scan(cam, check, tag, loc, places, debug, parallel, add_query, stream_manager)
         print('scan finished')
         return res

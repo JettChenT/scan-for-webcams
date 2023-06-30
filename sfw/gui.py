@@ -92,12 +92,12 @@ class WebcamGUI:
             if event == sg.WINDOW_CLOSED:
                 break
             
+            self.update_images()
             # Check if the number of streams has changed
             if not self.fixed and len(self.stream_manager) != self.prev_stream_count:
                 self.prev_stream_count = len(self.stream_manager)
                 self.create_window()
 
-            self.update_images()
 
         self.window.close()
 
