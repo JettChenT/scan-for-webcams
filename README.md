@@ -24,6 +24,7 @@ btw: we have a discord channel ! [join](https://discord.gg/JCepvsHNqW)
   - [Usage](#usage)
   - [Installation](#installation)
   - [Places365: On device footage classification](#places365-on-device-footage-classification)
+  - [Graphical User Interface](#graphical-user-interface)
   - [Demo](#demo)
 
 ## Usage
@@ -38,11 +39,14 @@ btw: we have a discord channel ! [join](https://discord.gg/JCepvsHNqW)
 
 * `python sfw search rtsp`: **DANGER** searches for rtsp servers on shodan, and performs enumeration on them to try and find streams
 
-* `python sfw search --help`: for more options and help
 
 * `python sfw play {url}`: plays the camera stream
   * for `rtsp://` streams, sfw will play it in a GUI viewer (see `sfw/rtsp.py`)
   * for all other streams, sfw will open it in the default browser.
+
+* `python sfw search ... --gui`: displays the scanned cameras in a grid visually.
+
+* `python sfw search --help`: for more options and help
 
 The program will output a list of links with the format of `ip_address:port`, and descriptions of the image beneath it.
 
@@ -85,6 +89,10 @@ python sfw search MJPG --tag=False --places
 ```
 
 The model will take some time to download, and will be cached for future use.
+
+## Graphical User Interface
+
+To get a display of the live streams of all the scanned webcams, simply append the `--gui` option to your command.
 
 ## Demo
 

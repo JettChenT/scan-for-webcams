@@ -13,18 +13,6 @@ from threading import Thread
 import time
 from search import Scanner
 
-webcamXP = WebCamera("{url}/cam_1.jpg")
-urls = [
-    "180.145.170.192:8008"
-]
-
-entries = []
-for url in urls:
-    ip, port = url.split(":")
-    entries.append(CameraEntry(ip, int(port)))
-records = [StreamRecord(webcamXP, entry) for entry in entries]
-stream_manager = StreamManager(records)
-
 DIMENSIONS = (200, 400)
 
 def get_img_data(f, maxsize=(1200, 850)):
@@ -100,14 +88,3 @@ class WebcamGUI:
 
 
         self.window.close()
-
-
-def tst_insert_urls(stream_manager: StreamManager):
-    scanner = Scanner()
-    scanner.scan_preset('MJPG', False, False, False, False, stream_manager=stream_manager)
-
-if __name__ == "__main__":
-    thread = Thread(target=tst_insert_urls, args=(stream_manager,))
-    thread.start()
-    gui = WebcamGUI(stream_manager)
-    gui.run()

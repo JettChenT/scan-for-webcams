@@ -38,6 +38,7 @@ class CLI:
         :param check: boolean, indicates whether or not you want to check if the image is completly black or white.
         :param tag: boolean, indicates whether or not you want to generate descriptions for the webcam.
         :param store: (optional)string, indicates the location where you want to save the results.
+        :param gui: boolean, indicates whether or not you want to use the gui.
         :param places: boolean, indicates whether or not you want to generate descriptions for the webcam with the "places" model.
         :param debug: boolean, indicates whether or not you want to print debug info.
         :param parallel: boolean, indicates whether or not you want to use parallel processing to speed up scanning.
