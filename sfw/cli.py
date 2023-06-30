@@ -5,6 +5,10 @@ from dotenv import load_dotenv
 import os
 import rtsp
 import json
+from threading import Thread
+from streaming import StreamManager, StreamRecord
+from cam import CameraEntry
+from gui import WebcamGUI, WebCamera
 
 class CLI:
     def init_scanner(self):
@@ -28,12 +32,13 @@ class CLI:
     def status(self):
         print("Status [green]OK[/green]!")
 
-    def search(self, preset, check=True, tag=True, store=None, loc=True, places=False, debug=False, parallel=True, protocol=None, query=""):
+    def search(self, preset, check=True, tag=True, store=None, loc=True, places=False, debug=False, parallel=True, gui=False, protocol=None, query=""):
         """
         :param preset: string, the type of pre written camera you want. choose from: 1)"webcamXP" 2)"MJPG 3)"yawCam" 4) "rtsp"
         :param check: boolean, indicates whether or not you want to check if the image is completly black or white.
         :param tag: boolean, indicates whether or not you want to generate descriptions for the webcam.
         :param store: (optional)string, indicates the location where you want to save the results.
+        :param gui: boolean, indicates whether or not you want to use the gui.
         :param places: boolean, indicates whether or not you want to generate descriptions for the webcam with the "places" model.
         :param debug: boolean, indicates whether or not you want to print debug info.
         :param parallel: boolean, indicates whether or not you want to use parallel processing to speed up scanning.
@@ -41,9 +46,17 @@ class CLI:
         :param query: string, additional query to add to the search, can be shodan filters or anything else.
         """
         self.init_scanner()
-        res = self.scanner.scan_preset(preset, check, tag, loc,places, debug, parallel, query)
-        if store:
-            json.dump(res, open(store, 'r'))
+        if not gui:
+            res = self.scanner.scan_preset(preset, check, tag, loc,places, debug, parallel, query)
+            if store:
+                json.dump(res, open(store, 'r'))
+        else:
+            stream_manager = StreamManager()
+            thread = Thread(target=self.scanner.scan_preset, args=(preset, check, tag, loc, places, debug, parallel, query, stream_manager))
+            thread.start()
+            gui = WebcamGUI(stream_manager)
+            gui.run()
+
 
     def search_custom(
         self,

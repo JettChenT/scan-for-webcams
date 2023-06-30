@@ -1,9 +1,10 @@
 from dataclasses import dataclass
 from PIL import Image
 import requests
-from rtsp import attack, capture
+from rtsp import attack, capture, stream_frames
 import contextlib
 import os
+from typing import Generator
 
 DEF_URL_SCHEME = "[link=http://{ip}:{port}]http://[i][green]{ip}[/green]:[red]{port}[/red][/link]"
 
@@ -26,12 +27,20 @@ class Camera:
         """Returns the displayed stream url"""
         pass
 
-    def get_image(self, entry: CameraEntry) -> Image:
+    def get_image(self, entry: CameraEntry) -> Image.Image | None:
         pass
 
-    def check_accessible(self, entry: CameraEntry) -> bool:
+    def check_accessible(self, entry: CameraEntry) -> bool | None:
         """Returns True if the camera is accessible"""
         pass
+
+    def stream(self, entry: CameraEntry) -> Generator[Image.Image, None, None]:
+        """Returns a generator of images"""
+        while True:
+            image = self.get_image(entry)
+            if image is None:
+                break
+            yield image
     
 
 class WebCamera(Camera):
@@ -54,7 +63,7 @@ class WebCamera(Camera):
     def get_image_url(self, entry: CameraEntry) -> str:
         return self.capture_url.format(url=self.get_base_url(entry))
     
-    def get_image(self, entry: CameraEntry) -> Image:
+    def get_image(self, entry: CameraEntry) -> Image.Image:
         """download image from url from get_image_url"""
         url = self.get_image_url(entry)
         return Image.open(requests.get(url, stream=True, timeout=5).raw)
@@ -79,7 +88,7 @@ class RTSPCamera(Camera):
         entry.store["stream_url"] = stream_url
         return stream_url
     
-    def get_image(self, entry: CameraEntry) -> Image:
+    def get_image(self, entry: CameraEntry) -> Image.Image:
         if entry.store.get("stream_url") is None:
             self.get_display_url(entry)
         res = capture(entry.store["stream_url"])
@@ -89,6 +98,11 @@ class RTSPCamera(Camera):
     
     def check_accessible(self, entry: CameraEntry) -> bool:
         return self.get_display_url(entry) is not None
+    
+    def stream(self, entry: CameraEntry) -> Generator[Image.Image, None, None]:
+        for frame in stream_frames(self.get_display_url(entry)):
+            res: Image.Image = Image.fromarray(frame)
+            yield res
 
 def get_cam(
         protocol: str|None = None, **kwargs) -> Camera:

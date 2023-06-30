@@ -13,6 +13,7 @@ from pathlib import Path
 from geoip import Locater
 from crfi import Clarifai
 from cam import get_cam, CameraEntry, Camera
+from streaming import StreamRecord, StreamManager
 import threading
 
 def handle():
@@ -82,9 +83,11 @@ class Scanner(object):
             places=False,
             debug=False,
             parallel=True,
-            add_query=""
+            add_query="",
+            stream_manager:None|StreamManager=None,
     ):
         print(f"loc:{geoip}, check_empty:{check_empty}, clarifai:{tag}, places:{places}, async:{parallel}")
+        print(stream_manager)
         query = cam.query + " " + add_query
         if debug:
             print(f"Searching for: {query}")
@@ -125,16 +128,16 @@ class Scanner(object):
         for result in camera_type_list:
             entry = CameraEntry(result['ip_str'], int(result['port']))
             if parallel:
-                t = threading.Thread(target=self.scan_one, args=(cam, entry, stdout_lock, check_empty, tag, geoip, places, debug))
+                t = threading.Thread(target=self.scan_one, args=(cam, entry, stdout_lock, check_empty, tag, geoip, places, debug, stream_manager))
                 t.start()
                 scanner_threads.append(t)
             else:
-                self.scan_one(cam, entry, stdout_lock, check_empty, tag, geoip, places, debug)
+                self.scan_one(cam, entry, stdout_lock, check_empty, tag, geoip, places, debug, stream_manager)
         for t in scanner_threads:
             t.join()
         return store
 
-    def scan_one(self, cam:Camera, entry: CameraEntry, stdout_lock: threading.Lock, check_empty=True, tag=True, geoip=True, places=False, debug=False):
+    def scan_one(self, cam:Camera, entry: CameraEntry, stdout_lock: threading.Lock, check_empty=True, tag=True, geoip=True, places=False, debug=False, stream_manager:None|StreamManager=None):
         try:
             res = ""
             def output(*args):
@@ -146,12 +149,14 @@ class Scanner(object):
                     output(
                         cam.get_display_url(entry)
                     )
+                    if stream_manager!=None: stream_manager.add(StreamRecord(cam, entry))
                 else:  
                     is_empty = self.check_empty(cam.get_image(entry))
                     if is_empty:
                         output(
                             cam.get_display_url(entry)
                         )
+                        if stream_manager!=None: stream_manager.add(StreamRecord(cam, entry))
                     else:
                         return
                 if geoip:
@@ -160,9 +165,9 @@ class Scanner(object):
                 if tag:
                     tags = self.tag_image(cam.get_image(entry))
                     for t in tags:
-                        output(f"|[green]{t}[/green]|", end=" ")
+                        output(f"|[green]{t}[/green]| ")
                     if len(tags) == 0:
-                        output("[i green]no description[i green]", end="")
+                        output("[i green]no description[i green]")
                     output()
                 if places:
                     im = cam.get_image(entry)
@@ -177,7 +182,7 @@ class Scanner(object):
     def testfunc(self, **kwargs):
         print(kwargs)
 
-    def scan_preset(self, preset, check, tag,places, loc,debug=False, parallel=True, add_query=""):
+    def scan_preset(self, preset, check, tag,places, loc,debug=False, parallel=True, add_query="", stream_manager:None|StreamManager=None):
         if preset not in self.config:
             raise KeyError("The preset entered doesn't exist")
         for key in self.config[preset]:
@@ -185,6 +190,6 @@ class Scanner(object):
                 self.config[preset][key] = self.config["default"][key]
         print('beginning scan...')
         cam = get_cam(**self.config[preset])
-        res = self.scan(cam, check, tag, loc, places, debug, parallel, add_query)
+        res = self.scan(cam, check, tag, loc, places, debug, parallel, add_query, stream_manager)
         print('scan finished')
         return res
