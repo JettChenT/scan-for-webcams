@@ -31,7 +31,7 @@ class CLI:
     def status(self):
         print("Status [green]OK[/green]!")
 
-    def search(self, preset, check=True, tag=True, store=None, loc=True, places=False, debug=False, parallel=True, gui=False, protocol=None, query=""):
+    def search(self, preset, check=True, tag=False, store=None, loc=True, places=False, debug=False, parallel=True, gui=False, protocol=None, query=""):
         """
         :param preset: string, the type of pre written camera you want. choose from: 1)"webcamXP" 2)"MJPG 3)"yawCam" 4) "rtsp"
         :param check: boolean, indicates whether or not you want to check if the image is completly black or white.
@@ -46,12 +46,12 @@ class CLI:
         """
         self.init_scanner()
         if not gui:
-            res = self.scanner.scan_preset(preset, check, tag, loc,places, debug, parallel, query)
+            res = self.scanner.scan_preset(preset, check, tag, places, loc, debug, parallel, query)
             if store:
                 json.dump(res, open(store, 'r'))
         else:
             stream_manager = StreamManager()
-            thread = Thread(target=self.scanner.scan_preset, args=(preset, check, tag, loc, places, debug, parallel, query, stream_manager))
+            thread = Thread(target=self.scanner.scan_preset, args=(preset, check, tag, places, loc, debug, parallel, query, stream_manager))
             thread.start()
             gui = WebcamGUI(stream_manager)
             gui.run()
