@@ -1,13 +1,9 @@
-import PySimpleGUI as sg
 from PIL import Image
-import io
-from cam import RTSPCamera, CameraEntry
+from cam import CameraEntry
 import threading
-import cv2 as cv
-import numpy as np
 from dataclasses import dataclass
 from cam import Camera
-from typing import Any, List
+from typing import List
 from PIL import Image
 
 @dataclass

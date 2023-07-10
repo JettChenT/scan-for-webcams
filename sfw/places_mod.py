@@ -7,7 +7,6 @@ from torch.nn import functional as F
 import os
 import numpy as np
 import cv2
-from PIL import Image
 
 MODEL_DIR = os.path.join(os.path.dirname(os.path.realpath(__file__)), 'places')
 

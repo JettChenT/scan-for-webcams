@@ -6,9 +6,8 @@ import os
 import rtsp
 import json
 from threading import Thread
-from streaming import StreamManager, StreamRecord
-from cam import CameraEntry
-from gui import WebcamGUI, WebCamera
+from streaming import StreamManager
+from gui import WebcamGUI
 
 class CLI:
     def init_scanner(self):

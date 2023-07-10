@@ -1,17 +1,8 @@
 import PySimpleGUI as sg
 from PIL import Image
 import io
-from cam import WebCamera, RTSPCamera, CameraEntry
-import cv2 as cv
 import numpy as np
-from dataclasses import dataclass
-from cam import Camera
-from typing import Any, List
 from PIL import Image
-from streaming import StreamManager, StreamRecord
-from threading import Thread
-import time
-from search import Scanner
 
 DIMENSIONS = (200, 400)
 
@@ -31,7 +22,7 @@ def get_img_data(f, maxsize=(1200, 850)):
 
 
 def imgtobytes(im):
-    if im==None:
+    if im is None:
         im = np.zeros(DIMENSIONS)
     if type(im) == np.ndarray:
         return get_img_data(im)

@@ -14,6 +14,7 @@ from geoip import Locater
 from crfi import Clarifai
 from cam import get_cam, CameraEntry, Camera
 from streaming import StreamRecord, StreamManager
+from utils import Dummy
 import threading
 
 def handle():
@@ -85,6 +86,8 @@ class Scanner(object):
             parallel=True,
             add_query="",
             stream_manager:None|StreamManager=None,
+            stdout_lock=None,
+            indicator=True
     ):
         print(f"loc:{geoip}, check_empty:{check_empty}, clarifai:{tag}, places:{places}, async:{parallel}")
         print(stream_manager)
@@ -96,7 +99,7 @@ class Scanner(object):
         if self.SHODAN_API_KEY == "":
             print("[red]Please set up shodan API key in environ![/red]")
             return
-        spinner = Halo(text="Initializing...", spinner="dots")
+        spinner = Halo(text="Initializing...", spinner="dots") if indicator else Dummy()
         spinner.start()
         if tag and (self.clarifai is None):
             self.init_clarifai()
@@ -105,7 +108,7 @@ class Scanner(object):
         if places and (self.places is None):
             self.init_places()
         spinner.succeed()
-        spinner = Halo(text="Looking for possible servers...", spinner="dots")
+        spinner = Halo(text="Looking for possible servers...", spinner="dots") if indicator else Dummy()
         spinner.start()
         try:
             results = self.api.search(query)
@@ -122,9 +125,8 @@ class Scanner(object):
             if cam.camera_type is None or cam.camera_type in result["data"]:
                 camera_type_list.append(result)
         store = []
-        cnt = 0
         scanner_threads = []
-        stdout_lock = threading.Lock()
+        stdout_lock = stdout_lock or threading.Lock()
         for result in camera_type_list:
             entry = CameraEntry(result['ip_str'], int(result['port']))
             if parallel:
@@ -149,14 +151,14 @@ class Scanner(object):
                     output(
                         cam.get_display_url(entry)
                     )
-                    if stream_manager!=None: stream_manager.add(StreamRecord(cam, entry))
+                    if stream_manager is not None: stream_manager.add(StreamRecord(cam, entry))
                 else:  
                     is_empty = self.check_empty(cam.get_image(entry))
                     if is_empty:
                         output(
                             cam.get_display_url(entry)
                         )
-                        if stream_manager!=None: stream_manager.add(StreamRecord(cam, entry))
+                        if stream_manager is not None: stream_manager.add(StreamRecord(cam, entry))
                     else:
                         return
                 if geoip:
@@ -182,7 +184,7 @@ class Scanner(object):
     def testfunc(self, **kwargs):
         print(kwargs)
 
-    def scan_preset(self, preset, check, tag,places, loc,debug=False, parallel=True, add_query="", stream_manager:None|StreamManager=None):
+    def scan_preset(self, preset, check, tag,places, loc,debug=False, parallel=True, add_query="", stream_manager:None|StreamManager=None, stdout_lock=None):
         if preset not in self.config:
             raise KeyError("The preset entered doesn't exist")
         for key in self.config[preset]:
@@ -190,6 +192,6 @@ class Scanner(object):
                 self.config[preset][key] = self.config["default"][key]
         print('beginning scan...')
         cam = get_cam(**self.config[preset])
-        res = self.scan(cam, check, tag, loc, places, debug, parallel, add_query, stream_manager)
+        res = self.scan(cam, check, tag, loc, places, debug, parallel, add_query, stream_manager, stdout_lock)
         print('scan finished')
         return res

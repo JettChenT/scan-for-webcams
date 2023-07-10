@@ -1,9 +1,6 @@
-from dataclasses import dataclass
 from PIL import Image
 import requests
 from rtsp import attack, capture, stream_frames
-import contextlib
-import os
 from typing import Generator
 
 DEF_URL_SCHEME = "[link=http://{ip}:{port}]http://[i][green]{ip}[/green]:[red]{port}[/red][/link]"
