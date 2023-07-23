@@ -57,17 +57,19 @@ If your terminal supports links, click the link and open it in your browser, oth
 
 2. install requirements.txt: `pip install -r requirements.txt`
 
-3. set up shodan:
+3. install tkinter: `sudo apt-get install python3-tk`
+
+4. set up shodan:
    go to [shodan.io](https://shodan.io), register/log in and grab your API key
 
-4. set up clarifai:
+5. set up clarifai:
    go to [clarifai.com](https://clarifai.com), register/log in, create an application and grab your API key.
    Alternatively, use the local [places365](#places365-on-device-footage-classification) model.
 
-5. setup geoip:
+6. setup geoip:
    go to [geo.ipify.org](https://geo.ipify.org), register/log in and grab your API key
    
-6. Add API keys:
+7. Add API keys:
    1. run `python sfw setup`
    2. enter your shodan, clarifai and geoip API keys
 
