@@ -1,5 +1,4 @@
 # Rudimentary VLLM support for generating descriptions of images.
-#
 
 from pathlib import Path
 from PIL import Image
@@ -8,6 +7,8 @@ import array
 import ctypes
 from llama_cpp import (Llama, clip_model_load,  llava_image_embed_make_with_bytes,
     llava_image_embed_p, llava_image_embed_free,  llava_eval_image_embed)
+from huggingface_hub import hf_hub_download
+from typing import Tuple
 
 class VLLM:
     def prompt(self, prompt: str, image: Image.Image | Path | None = None) -> str:
@@ -15,6 +16,15 @@ class VLLM:
 
     def heartbeat(self) -> bool:
         pass
+
+    def refresh(self):
+        """Clears the current chat session if exists, and initialize a new one"""
+        pass
+
+    def describe(self, image: Image.Image | Path) -> str:
+        self.refresh()
+        return self.prompt("Describe this image in a concise manner", image)
+
 
 class LLAVA(VLLM):
     """
@@ -26,9 +36,9 @@ class LLAVA(VLLM):
         self.temp = temp
         self.model_path = model
         self.mmproj_path = mmproj
-        self.initialize_llm()
+        self.refresh()
 
-    def initialize_llm(self):
+    def refresh(self):
         self.llm = Llama(model_path=str(self.model_path), n_ctx=self.N_CTX, n_gpu_layers=1)
         self.ctx_clip = clip_model_load(str(self.mmproj_path).encode('utf-8'))
         self.system_prompt()
@@ -76,7 +86,7 @@ class LLAVA(VLLM):
 
     def prompt(self, prompt: str, image: Image.Image | Path | None = None, refresh: bool=False, stream: bool=False) -> str:
         if refresh:
-            self.initialize_llm()
+            self.refresh()
         self.llm.eval(self.llm.tokenize("\nUSER: ".encode('utf8')))
         if image is not None:
             self.eval_img(image)
@@ -86,3 +96,17 @@ class LLAVA(VLLM):
 
     def heartbeat(self) -> bool:
         return self.llm is not None
+
+def load_llava(version: str = '7b', quant_strategy: str = 'q4_k') -> Tuple[Path, Path]:
+    """Loads or Downloads llava if not exists, and returns the path"""
+    assert quant_strategy in ['f16', 'q4_k', 'q5_k']
+    if version == "13b":
+        raise Exception("LLAVA 13b is not supported yet!")
+    else:
+        repo_id = "mys/ggml_llava-v1.5-7b"
+    model_path = hf_hub_download(repo_id=repo_id, filename=f"ggml-model-{quant_strategy}.gguf")
+    mmproj_path = hf_hub_download(repo_id = repo_id, filename="mmproj-model-f16.gguf")
+    return Path(model_path), Path(mmproj_path)
+
+if __name__ == '__main__':
+    load_llava()
