@@ -133,7 +133,7 @@ shodan-api-key.env
 .idea/
 .tmpimage
 tmp/
-**/.env
+**/.env.*
 geoip_cache.json
 .tst/
 bak.env
