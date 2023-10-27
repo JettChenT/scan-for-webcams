@@ -8,7 +8,7 @@ import ctypes
 from llama_cpp import (Llama, clip_model_load, llava_image_embed_make_with_bytes,
                        llava_image_embed_p, llava_image_embed_free, llava_eval_image_embed)
 from huggingface_hub import hf_hub_download
-from typing import Tuple
+from typing import Type
 
 
 class VLLM:
@@ -22,8 +22,9 @@ class VLLM:
         """Clears the current chat session if exists, and initialize a new one"""
         pass
 
-    def describe(self, image: Image.Image | Path) -> str:
-        self.refresh()
+    def describe(self, image: Image.Image | Path, refresh=False) -> str:
+        if refresh:
+            self.refresh()
         return self.prompt("Describe this image in a concise manner", image)
 
 
@@ -111,6 +112,14 @@ class LLAVA(VLLM):
     def heartbeat(self) -> bool:
         return self.llm is not None
 
+class VLLMManager:
+    def __init__(self, vllm: Type[VLLM], *args, **kwargs):
+        self.vllm = vllm
+        self.args = args
+        self.kwargs = kwargs
+
+    def spawn(self):
+        return self.vllm(*self.args, **self.kwargs)
 
 if __name__ == '__main__':
     llava = LLAVA(streaming=True)
