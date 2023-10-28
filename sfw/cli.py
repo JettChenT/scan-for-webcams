@@ -9,6 +9,7 @@ from threading import Thread
 from streaming import StreamManager
 from gui import WebcamGUI
 
+
 class CLI:
     def init_scanner(self):
         try:
@@ -31,7 +32,20 @@ class CLI:
     def status(self):
         print("Status [green]OK[/green]!")
 
-    def search(self, preset, check=True, tag=False, store=None, loc=True, places=False, debug=False, parallel=True, gui=False, protocol=None, query=""):
+    def search(
+        self,
+        preset,
+        check=True,
+        tag=False,
+        store=None,
+        loc=True,
+        places=False,
+        debug=False,
+        parallel=True,
+        gui=False,
+        protocol=None,
+        query="",
+    ):
         """
         :param preset: string, the type of pre written camera you want. choose from: 1)"webcamXP" 2)"MJPG 3)"yawCam" 4) "rtsp"
         :param check: boolean, indicates whether or not you want to check if the image is completly black or white.
@@ -46,16 +60,30 @@ class CLI:
         """
         self.init_scanner()
         if not gui:
-            res = self.scanner.scan_preset(preset, check, tag, places, loc, debug, parallel, query)
+            res = self.scanner.scan_preset(
+                preset, check, tag, places, loc, debug, parallel, query
+            )
             if store:
-                json.dump(res, open(store, 'r'))
+                json.dump(res, open(store, "r"))
         else:
             stream_manager = StreamManager()
-            thread = Thread(target=self.scanner.scan_preset, args=(preset, check, tag, places, loc, debug, parallel, query, stream_manager))
+            thread = Thread(
+                target=self.scanner.scan_preset,
+                args=(
+                    preset,
+                    check,
+                    tag,
+                    places,
+                    loc,
+                    debug,
+                    parallel,
+                    query,
+                    stream_manager,
+                ),
+            )
             thread.start()
             gui = WebcamGUI(stream_manager)
             gui.run()
-
 
     def search_custom(
         self,
@@ -67,9 +95,9 @@ class CLI:
         loc=True,
         places=False,
         parallel=True,
-        store = False,
+        store=False,
         search_q="webcams",
-        debug=False
+        debug=False,
     ):
         """
         :param camera_type: string, the type of camera. this string must appear in the data returned by shodan
@@ -91,10 +119,10 @@ class CLI:
             search_q=search_q,
             loc=loc,
             places=places,
-            debug=debug
+            debug=debug,
         )
         if store:
-            json.dump(res, open(store, 'r'))
+            json.dump(res, open(store, "r"))
 
     def show_environ(self):
         directory = Path(__file__).parent
@@ -106,8 +134,8 @@ class CLI:
         print(f"shodan api key:{shodan}")
         print(f"clarifai api key: {clarifai}")
         print(f"geoip api key: {geoip}")
-    
-    def play(self, url:str):
+
+    def play(self, url: str):
         """
         :param url: string, the url of the webcam
         """

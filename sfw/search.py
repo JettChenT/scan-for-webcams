@@ -18,11 +18,13 @@ from utils import Dummy
 from vllm import VLLM, VLLMManager, LLAVA
 import threading
 
+
 def handle():
     err = sys.exc_info()[0]
     print("[red]ERROR:[/red]")
     print(err)
     print(traceback.format_exc())
+
 
 class Scanner(object):
     def __init__(self):
@@ -35,7 +37,7 @@ class Scanner(object):
             raise KeyError("Shodan API key not found in envrion")
         self.api = shodan.Shodan(self.SHODAN_API_KEY)
         # preset url schemes
-        self.clarifai = self.locator = self.places = self.vllm_manager =  None
+        self.clarifai = self.locator = self.places = self.vllm_manager = None
         self.cli = True
         with open(directory / "cams.json") as f:
             self.config = json.load(f)
@@ -55,9 +57,12 @@ class Scanner(object):
     def init_places(self):
         try:
             from places_mod import Places
+
             self.places = Places()
         except ImportError as e:
-            warnings.warn("Please make sure you have torch and torchvision installed to use this feature")
+            warnings.warn(
+                "Please make sure you have torch and torchvision installed to use this feature"
+            )
             raise e
         except Exception as e:
             print(f"Unexpected Error: {e}")
@@ -76,25 +81,27 @@ class Scanner(object):
         return True
 
     def output(self, *args, **kwargs):
-        if(self.cli):
+        if self.cli:
             print(*args, **kwargs)
 
     def scan(
-            self,
-            cam: Camera,
-            check_empty=True,
-            tag=True,
-            geoip=True,
-            places=False,
-            debug=False,
-            parallel=True,
-            vllm = False,
-            add_query="",
-            stream_manager:None|StreamManager=None,
-            stdout_lock=None,
-            indicator=True
+        self,
+        cam: Camera,
+        check_empty=True,
+        tag=True,
+        geoip=True,
+        places=False,
+        debug=False,
+        parallel=True,
+        vllm=False,
+        add_query="",
+        stream_manager: None | StreamManager = None,
+        stdout_lock=None,
+        indicator=True,
     ):
-        print(f"loc:{geoip}, check_empty:{check_empty}, clarifai:{tag}, places:{places}, async:{parallel}")
+        print(
+            f"loc:{geoip}, check_empty:{check_empty}, clarifai:{tag}, places:{places}, async:{parallel}"
+        )
         print(stream_manager)
         query = cam.query + " " + add_query
         if debug:
@@ -115,7 +122,11 @@ class Scanner(object):
         if vllm and (self.vllm_manager is None):
             self.init_vllm()
         spinner.succeed()
-        spinner = Halo(text="Looking for possible servers...", spinner="dots") if indicator else Dummy()
+        spinner = (
+            Halo(text="Looking for possible servers...", spinner="dots")
+            if indicator
+            else Dummy()
+        )
         spinner.start()
         try:
             results = self.api.search(query)
@@ -135,8 +146,19 @@ class Scanner(object):
         scanner_threads = []
         stdout_lock = stdout_lock or threading.Lock()
         for result in camera_type_list:
-            entry = CameraEntry(result['ip_str'], int(result['port']))
-            args = (cam, entry, stdout_lock, check_empty, tag, geoip, places, vllm, debug, stream_manager)
+            entry = CameraEntry(result["ip_str"], int(result["port"]))
+            args = (
+                cam,
+                entry,
+                stdout_lock,
+                check_empty,
+                tag,
+                geoip,
+                places,
+                vllm,
+                debug,
+                stream_manager,
+            )
             if parallel:
                 t = threading.Thread(target=self.scan_one, args=args)
                 t.start()
@@ -147,31 +169,45 @@ class Scanner(object):
             t.join()
         return store
 
-    def scan_one(self, cam:Camera, entry: CameraEntry, stdout_lock: threading.Lock, check_empty=True, tag=True, geoip=True, places=False, vllm=False, debug=False, stream_manager:None|StreamManager=None):
+    def scan_one(
+        self,
+        cam: Camera,
+        entry: CameraEntry,
+        stdout_lock: threading.Lock,
+        check_empty=True,
+        tag=True,
+        geoip=True,
+        places=False,
+        vllm=False,
+        debug=False,
+        stream_manager: None | StreamManager = None,
+    ):
         try:
             res = ""
+
             def output(*args):
                 nonlocal res
                 res += " ".join(args)
                 res += "\n"
+
             if cam.check_accessible(entry):
                 if not check_empty:
-                    output(
-                        cam.get_display_url(entry)
-                    )
-                    if stream_manager is not None: stream_manager.add(StreamRecord(cam, entry))
-                else:  
+                    output(cam.get_display_url(entry))
+                    if stream_manager is not None:
+                        stream_manager.add(StreamRecord(cam, entry))
+                else:
                     is_empty = self.check_empty(cam.get_image(entry))
                     if is_empty:
-                        output(
-                            cam.get_display_url(entry)
-                        )
-                        if stream_manager is not None: stream_manager.add(StreamRecord(cam, entry))
+                        output(cam.get_display_url(entry))
+                        if stream_manager is not None:
+                            stream_manager.add(StreamRecord(cam, entry))
                     else:
                         return
                 if geoip:
                     country, region, hour, minute = self.locator.locate(entry.ip)
-                    output(f":earth_asia:[green]{country} , {region} {hour:02d}:{minute:02d}[/green]")
+                    output(
+                        f":earth_asia:[green]{country} , {region} {hour:02d}:{minute:02d}[/green]"
+                    )
                 if tag:
                     tags = self.tag_image(cam.get_image(entry))
                     for t in tags:
@@ -196,13 +232,25 @@ class Scanner(object):
     def testfunc(self, **kwargs):
         print(kwargs)
 
-    def scan_preset(self, preset, check, tag,places, loc,debug=False, parallel=True, add_query="", stream_manager:None|StreamManager=None, stdout_lock=None):
+    def scan_preset(
+        self,
+        preset,
+        check,
+        tag,
+        places,
+        loc,
+        debug=False,
+        parallel=True,
+        add_query="",
+        stream_manager: None | StreamManager = None,
+        stdout_lock=None,
+    ):
         if preset not in self.config:
             raise KeyError("The preset entered doesn't exist")
         for key in self.config[preset]:
             if self.config[preset][key] == "[def]":
                 self.config[preset][key] = self.config["default"][key]
-        print('beginning scan...')
+        print("beginning scan...")
         cam = get_cam(**self.config[preset])
         res = self.scan(
             cam=cam,
@@ -214,8 +262,8 @@ class Scanner(object):
             parallel=parallel,
             add_query=add_query,
             stream_manager=stream_manager,
-            stdout_lock=stdout_lock
+            stdout_lock=stdout_lock,
         )
 
-        print('scan finished')
+        print("scan finished")
         return res

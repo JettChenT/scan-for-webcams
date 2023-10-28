@@ -8,20 +8,24 @@ import os
 import numpy as np
 import cv2
 
-MODEL_DIR = os.path.join(os.path.dirname(os.path.realpath(__file__)), 'places')
+MODEL_DIR = os.path.join(os.path.dirname(os.path.realpath(__file__)), "places")
+
 
 def get_path(filename):
     return os.path.join(MODEL_DIR, filename)
 
+
 def cap(s, n):
-    return s[:n] + (s[n:] and '..')
+    return s[:n] + (s[n:] and "..")
+
 
 def download_file(url, path):
     """download file from url to path with wget, create directories if needed"""
     if os.path.exists(path):
         return
-    os.system(f'mkdir -p {os.path.dirname(path)}')
-    os.system(f'wget -O {path} {url}')
+    os.system(f"mkdir -p {os.path.dirname(path)}")
+    os.system(f"wget -O {path} {url}")
+
 
 # hacky way to deal with the Pytorch 1.0 update
 def recursion_change_bn(module):
@@ -36,21 +40,21 @@ def recursion_change_bn(module):
 def load_labels():
     # prepare all the labels
     # scene category relevant
-    file_name_category = 'categories_places365.txt'
+    file_name_category = "categories_places365.txt"
     if not os.access(file_name_category, os.W_OK):
-        synset_url = 'https://raw.githubusercontent.com/csailvision/places365/master/categories_places365.txt'
+        synset_url = "https://raw.githubusercontent.com/csailvision/places365/master/categories_places365.txt"
         # os.system('wget ' + synset_url)
         download_file(synset_url, get_path(file_name_category))
     classes = list()
     with open(get_path(file_name_category)) as class_file:
         for line in class_file:
-            classes.append(line.strip().split(' ')[0][3:])
+            classes.append(line.strip().split(" ")[0][3:])
     classes = tuple(classes)
 
     # indoor and outdoor relevant
-    file_name_IO = 'IO_places365.txt'
+    file_name_IO = "IO_places365.txt"
     if not os.access(file_name_IO, os.W_OK):
-        synset_url = 'https://raw.githubusercontent.com/csailvision/places365/master/IO_places365.txt'
+        synset_url = "https://raw.githubusercontent.com/csailvision/places365/master/IO_places365.txt"
         # os.system('wget ' + synset_url)
         download_file(synset_url, get_path(file_name_IO))
     with open(get_path(file_name_IO)) as f:
@@ -62,17 +66,17 @@ def load_labels():
     labels_IO = np.array(labels_IO)
 
     # scene attribute relevant
-    file_name_attribute = 'labels_sunattribute.txt'
+    file_name_attribute = "labels_sunattribute.txt"
     if not os.access(file_name_attribute, os.W_OK):
-        synset_url = 'https://raw.githubusercontent.com/csailvision/places365/master/labels_sunattribute.txt'
+        synset_url = "https://raw.githubusercontent.com/csailvision/places365/master/labels_sunattribute.txt"
         # os.system('wget ' + synset_url)
         download_file(synset_url, get_path(file_name_attribute))
     with open(get_path(file_name_attribute)) as f:
         lines = f.readlines()
         labels_attribute = [item.rstrip() for item in lines]
-    file_name_W = 'W_sceneattribute_wideresnet18.npy'
+    file_name_W = "W_sceneattribute_wideresnet18.npy"
     if not os.access(file_name_W, os.W_OK):
-        synset_url = 'http://places2.csail.mit.edu/models_places365/W_sceneattribute_wideresnet18.npy'
+        synset_url = "http://places2.csail.mit.edu/models_places365/W_sceneattribute_wideresnet18.npy"
         # os.system('wget ' + synset_url)
         download_file(synset_url, get_path(file_name_W))
     W_attribute = np.load(get_path(file_name_W))
@@ -97,29 +101,40 @@ def returnCAM(feature_conv, weight_softmax, class_idx):
 
 def returnTF():
     # load the image transformer
-    tf = trn.Compose([
-        trn.Resize((224, 224)),
-        trn.ToTensor(),
-        trn.Normalize([0.485, 0.456, 0.406], [0.229, 0.224, 0.225])
-    ])
+    tf = trn.Compose(
+        [
+            trn.Resize((224, 224)),
+            trn.ToTensor(),
+            trn.Normalize([0.485, 0.456, 0.406], [0.229, 0.224, 0.225]),
+        ]
+    )
     return tf
-
 
 
 def load_model(hook_feature):
     # this model has a last conv feature map as 14x14
 
-    model_file = 'wideresnet18_places365.pth.tar'
+    model_file = "wideresnet18_places365.pth.tar"
     model_path = os.path.join(MODEL_DIR, model_file)
     if not os.access(model_path, os.W_OK):
-        download_file("http://places2.csail.mit.edu/models_places364/" + model_file, model_path)
-        download_file("https://raw.githubusercontent.com/csailvision/places365/master/wideresnet.py", os.path.join(MODEL_DIR, "wideresnet.py"))
+        download_file(
+            "http://places2.csail.mit.edu/models_places364/" + model_file, model_path
+        )
+        download_file(
+            "https://raw.githubusercontent.com/csailvision/places365/master/wideresnet.py",
+            os.path.join(MODEL_DIR, "wideresnet.py"),
+        )
 
     # import wideresnet
     from places import wideresnet
+
     model = wideresnet.resnet18(num_classes=365)
-    checkpoint = torch.load(get_path(model_file), map_location=lambda storage, loc: storage)
-    state_dict = {str.replace(k, 'module.', ''): v for k, v in checkpoint['state_dict'].items()}
+    checkpoint = torch.load(
+        get_path(model_file), map_location=lambda storage, loc: storage
+    )
+    state_dict = {
+        str.replace(k, "module.", ""): v for k, v in checkpoint["state_dict"].items()
+    }
     model.load_state_dict(state_dict)
 
     # hacky way to deal with the upgraded batchnorm2D and avgpool layers...
@@ -128,19 +143,27 @@ def load_model(hook_feature):
     model.avgpool = torch.nn.AvgPool2d(kernel_size=14, stride=1, padding=0)
     model.eval()
     # hook the feature extractor
-    features_names = ['layer4', 'avgpool']  # this is the last conv layer of the resnet
+    features_names = ["layer4", "avgpool"]  # this is the last conv layer of the resnet
     for name in features_names:
         model._modules.get(name).register_forward_hook(hook_feature)
     return model
 
+
 class Places:
     def __init__(self):
         # load the labels
-        self.classes, self.labels_IO, self.labels_attribute, self.W_attribute = load_labels()
+        (
+            self.classes,
+            self.labels_IO,
+            self.labels_attribute,
+            self.W_attribute,
+        ) = load_labels()
 
         # load the model
         self.features_blobs = []
-        self.model = load_model(lambda module,input,output: self.hook_feature(module,input,output))
+        self.model = load_model(
+            lambda module, input, output: self.hook_feature(module, input, output)
+        )
 
         # load the transformer
         self.tf = returnTF()  # image transformer
@@ -156,7 +179,7 @@ class Places:
     def extract(self, img):
         # if image contains less than 3 channels, transform it to 3 channels
         if len(img.split()) < 3:
-            img = img.convert('RGB')
+            img = img.convert("RGB")
         input_img = V(self.tf(img).unsqueeze(0))
 
         # forward pass
@@ -176,11 +199,16 @@ class Places:
         io_typ = "indoor" if io_image < 0.5 else "outdoor"
         categories = [self.classes[idx[i]] for i in range(0, 5)]
         # scene attributes
-        idx_a =  np.argsort(responses_attribute)
+        idx_a = np.argsort(responses_attribute)
         attributes = [self.labels_attribute[idx_a[i]] for i in range(-1, -10, -1)]
+
         # compile results in to a string
-        def wrap(s): return f"[blue]{s}[/blue]"
-        def wrap_list(l): return ', '.join([wrap(s) for s in l])
+        def wrap(s):
+            return f"[blue]{s}[/blue]"
+
+        def wrap_list(lst):
+            return ", ".join([wrap(s) for s in lst])
+
         result = f"""{wrap(io_typ)}
 Categories:{wrap_list(categories)}
 Attributes:{wrap_list(attributes)}"""
