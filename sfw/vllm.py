@@ -12,10 +12,12 @@ from llama_cpp import (
     llava_image_embed_p,
     llava_image_embed_free,
     llava_eval_image_embed,
+    llama_log_set
 )
 from huggingface_hub import hf_hub_download
 from typing import Type
 from wurlitzer import pipes
+import ctypes
 
 
 class VLLM:
@@ -165,18 +167,26 @@ class LLAVA(VLLM):
 
 
 class VLLMManager:
-    def __init__(self, vllm: Type[VLLM], *args, **kwargs):
+    def __init__(self, vllm: Type[VLLM], cache:bool=True, *args, **kwargs):
         self.vllm = vllm
         self.args = args
         self.kwargs = kwargs
+        self.cache = cache
+        self.vllm_cache : VLLM|None = None
 
     def spawn(self):
-        return self.vllm(*self.args, **self.kwargs)
+        with pipes():
+            if self.cache and self.vllm_cache:
+                self.vllm_cache.refresh()
+                return self.vllm_cache
+            res = self.vllm(*self.args, **self.kwargs)
+            if self.cache:
+                self.vllm_cache = res
+            return res
 
 
 if __name__ == "__main__":
-    manager = VLLMManager(LLAVA)
-    llava = manager.spawn()
-    print(llava.describe(Image.open("../.tmp/flowie.png")))
-    llava.refresh()
-    print(llava.describe(Image.open("../.tmp/accel.jpg")))
+    manager = VLLMManager(LLAVA, streaming=True)
+    for im_path in ["../.tmp/flowie.png", "../.tmp/accel.jpg"]:
+        llava = manager.spawn()
+        llava.describe(Image.open(im_path))

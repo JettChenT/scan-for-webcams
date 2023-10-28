@@ -68,7 +68,7 @@ class Scanner(object):
             print(f"Unexpected Error: {e}")
 
     def init_vllm(self, _vllm=None):
-        self.vllm_manager = VLLMManager(LLAVA)
+        self.vllm_manager = VLLMManager(LLAVA, streaming=True)
         self.vllm_manager.spawn()
 
     def tag_image(self, url):
@@ -222,13 +222,13 @@ class Scanner(object):
                 if places:
                     im = cam.get_image(entry)
                     output(self.places.output(im))
+                with stdout_lock:
+                    print(res)
                 if vllm:
                     vl: VLLM = self.vllm_manager.spawn()
                     im = cam.get_image(entry)
-                    output(vl.describe(im))
-                output()
-                with stdout_lock:
-                    print(res)
+                    vl.describe(im)
+                    print()
         except Exception as e:
             if debug:
                 raise e
