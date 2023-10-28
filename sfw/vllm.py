@@ -25,7 +25,7 @@ class VLLM:
     def describe(self, image: Image.Image | Path, refresh=False) -> str:
         if refresh:
             self.refresh()
-        return self.prompt("Describe this image in a concise manner", image)
+        return self.prompt("Describe this image in a single sentence, within 15 words, and then exit.", image)
 
 
 class LLAVA(VLLM):
@@ -64,9 +64,12 @@ class LLAVA(VLLM):
 
     def load_image_embed(self, image: Image.Image) -> llava_image_embed_p:
         output = io.BytesIO()
-        image.save(output, format='JPEG')
-        return llava_image_embed_make_with_bytes(ctx_clip=self.ctx_clip, n_threads=1, image_bytes=output.getvalue(),
-                                                 image_bytes_length=output.tell())
+        image.save(output, format='PNG')
+        im_len = len(output.getvalue())
+        data_array = array.array('B', output.getvalue())
+        c_ubyte_ptr = (ctypes.c_ubyte * len(data_array)).from_buffer(data_array)
+        return llava_image_embed_make_with_bytes(ctx_clip=self.ctx_clip, n_threads=1, image_bytes=c_ubyte_ptr,
+                                                 image_bytes_length=im_len)
 
     def eval_img(self, image: Image.Image | Path):
         if isinstance(image, Image.Image):
@@ -87,7 +90,7 @@ class LLAVA(VLLM):
                 t = self.llm.detokenize([t_id]).decode('utf8')
             except UnicodeDecodeError:
                 break
-            if t == "</s>":
+            if t in ["</s>", "\n"]:
                 break
             if self.streaming:
                 print(t, end="")
@@ -122,5 +125,5 @@ class VLLMManager:
         return self.vllm(*self.args, **self.kwargs)
 
 if __name__ == '__main__':
-    llava = LLAVA(streaming=True)
-    llava.prompt("Hi there! How are you?")
+    llava = LLAVA()
+    print(llava.describe(Image.open("../.tmp/flowie.png")))
