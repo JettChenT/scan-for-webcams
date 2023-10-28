@@ -42,6 +42,7 @@ class CLI:
         places=False,
         debug=False,
         parallel=True,
+        vllm=False,
         gui=False,
         protocol=None,
         query="",
@@ -61,7 +62,7 @@ class CLI:
         self.init_scanner()
         if not gui:
             res = self.scanner.scan_preset(
-                preset, check, tag, places, loc, debug, parallel, query
+                preset, check, tag, places, loc, vllm, debug, parallel, query
             )
             if store:
                 json.dump(res, open(store, "r"))
@@ -95,6 +96,7 @@ class CLI:
         loc=True,
         places=False,
         parallel=True,
+        vllm=False,
         store=False,
         search_q="webcams",
         debug=False,
@@ -120,6 +122,7 @@ class CLI:
             loc=loc,
             places=places,
             debug=debug,
+            vllm=vllm,
         )
         if store:
             json.dump(res, open(store, "r"))

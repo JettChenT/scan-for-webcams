@@ -15,6 +15,7 @@ from llama_cpp import (
 )
 from huggingface_hub import hf_hub_download
 from typing import Type
+from wurlitzer import pipes
 
 
 class VLLM:
@@ -54,6 +55,7 @@ class LLAVA(VLLM):
         debug: bool = False,
     ):
         assert quant_strategy in ["f16", "q4_k", "q5_k"]
+        assert version in ["13b", "7b"]
         if version == "13b":
             raise Exception("LLAVA 13b is not supported yet!")
         else:
@@ -70,13 +72,14 @@ class LLAVA(VLLM):
         self.refresh()
 
     def refresh(self):
-        self.llm = Llama(
-            model_path=str(self.model_path),
-            n_ctx=self.N_CTX,
-            n_gpu_layers=1,
-            verbose=self.debug,
-        )
-        self.ctx_clip = clip_model_load(str(self.mmproj_path).encode("utf-8"))
+        with pipes():
+            self.llm = Llama(
+                model_path=str(self.model_path),
+                n_ctx=self.N_CTX,
+                n_gpu_layers=1,
+                verbose=self.debug,
+            )
+            self.ctx_clip = clip_model_load(str(self.mmproj_path).encode("utf-8"))
         self.system_prompt()
 
     def load_image_path_embded(self, image: Path) -> llava_image_embed_p:
@@ -106,10 +109,11 @@ class LLAVA(VLLM):
         )
 
     def eval_img(self, image: Image.Image | Path):
-        if isinstance(image, Image.Image):
-            im = self.load_image_embed(image)
-        else:
-            im = self.load_image_path_embded(image)
+        with pipes():
+            if isinstance(image, Image.Image):
+                im = self.load_image_embed(image)
+            else:
+                im = self.load_image_path_embded(image)
         n_past = ctypes.c_int(self.llm.n_tokens)
         n_past_p = ctypes.byref(n_past)
         llava_eval_image_embed(self.llm.ctx, im, self.llm.n_batch, n_past_p)
@@ -171,5 +175,8 @@ class VLLMManager:
 
 
 if __name__ == "__main__":
-    llava = LLAVA()
+    manager = VLLMManager(LLAVA)
+    llava = manager.spawn()
     print(llava.describe(Image.open("../.tmp/flowie.png")))
+    llava.refresh()
+    print(llava.describe(Image.open("../.tmp/accel.jpg")))

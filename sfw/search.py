@@ -69,6 +69,7 @@ class Scanner(object):
 
     def init_vllm(self, _vllm=None):
         self.vllm_manager = VLLMManager(LLAVA)
+        self.vllm_manager.spawn()
 
     def tag_image(self, url):
         concepts = self.clarifai.get_concepts(url)
@@ -100,7 +101,7 @@ class Scanner(object):
         indicator=True,
     ):
         print(
-            f"loc:{geoip}, check_empty:{check_empty}, clarifai:{tag}, places:{places}, async:{parallel}"
+            f"loc:{geoip}, check_empty:{check_empty}, clarifai:{tag}, places:{places}, vllm:{vllm}, async:{parallel}"
         )
         print(stream_manager)
         query = cam.query + " " + add_query
@@ -120,6 +121,9 @@ class Scanner(object):
         if places and (self.places is None):
             self.init_places()
         if vllm and (self.vllm_manager is None):
+            if parallel:
+                raise Exception("VLLM models are currently not compatible with parallel mode. Set --parallel=False to "
+                                "disable parallel mode.")
             self.init_vllm()
         spinner.succeed()
         spinner = (
@@ -235,10 +239,11 @@ class Scanner(object):
     def scan_preset(
         self,
         preset,
-        check,
-        tag,
-        places,
-        loc,
+        check=True,
+        tag=True,
+        places=False,
+        loc=False,
+        vllm=False,
         debug=False,
         parallel=True,
         add_query="",
@@ -263,6 +268,7 @@ class Scanner(object):
             add_query=add_query,
             stream_manager=stream_manager,
             stdout_lock=stdout_lock,
+            vllm=vllm
         )
 
         print("scan finished")
