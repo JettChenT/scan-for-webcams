@@ -122,8 +122,10 @@ class Scanner(object):
             self.init_places()
         if vllm and (self.vllm_manager is None):
             if parallel:
-                raise Exception("VLLM models are currently not compatible with parallel mode. Set --parallel=False to "
-                                "disable parallel mode.")
+                raise Exception(
+                    "VLLM models are currently not compatible with parallel mode. Set --parallel=False to "
+                    "disable parallel mode."
+                )
             self.init_vllm()
         spinner.succeed()
         spinner = (
@@ -268,7 +270,7 @@ class Scanner(object):
             add_query=add_query,
             stream_manager=stream_manager,
             stdout_lock=stdout_lock,
-            vllm=vllm
+            vllm=vllm,
         )
 
         print("scan finished")

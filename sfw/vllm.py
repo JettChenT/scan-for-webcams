@@ -12,12 +12,10 @@ from llama_cpp import (
     llava_image_embed_p,
     llava_image_embed_free,
     llava_eval_image_embed,
-    llama_log_set
 )
 from huggingface_hub import hf_hub_download
 from typing import Type
 from wurlitzer import pipes
-import ctypes
 
 
 class VLLM:
@@ -167,12 +165,12 @@ class LLAVA(VLLM):
 
 
 class VLLMManager:
-    def __init__(self, vllm: Type[VLLM], cache:bool=True, *args, **kwargs):
+    def __init__(self, vllm: Type[VLLM], cache: bool = True, *args, **kwargs):
         self.vllm = vllm
         self.args = args
         self.kwargs = kwargs
         self.cache = cache
-        self.vllm_cache : VLLM|None = None
+        self.vllm_cache: VLLM | None = None
 
     def spawn(self):
         with pipes():
