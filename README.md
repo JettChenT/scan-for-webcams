@@ -83,7 +83,7 @@ To use this, run the following commands:
 
 ```shell
 pip install -U --no-cache-dir llama-cpp-python@git+https://github.com/damian0815/llama-cpp-python/@4ec35390d72faba70942b9605dfcbde2bda0bdad
-pip install huggingface_hub
+pip install huggingface_hub wurlitzer
 python sfw search webcamXP --vllm=True --parallel=False # or any other search command with the latter two flags
 ```
 
