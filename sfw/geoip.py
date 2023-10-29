@@ -6,7 +6,9 @@ import json
 
 
 def parse_tz(tzstr):
-    sign = -1 + (tzstr[0] == "+") * 2  # 1 if timezone is positive, -1 if timezone is negative
+    sign = (
+        -1 + (tzstr[0] == "+") * 2
+    )  # 1 if timezone is positive, -1 if timezone is negative
     tzstr = tzstr[1:]
     hour, minute = tzstr.split(":")
     hour = int(hour) * sign
@@ -20,8 +22,10 @@ def get_time(tzstr):
     curTime = datetime.now(tz=timeZone)
     return curTime.hour, curTime.minute
 
+
 def get_country_name(country):
     return countries.get(alpha_2=country).name
+
 
 class Locater:
     def __init__(self, api_key):
@@ -35,36 +39,36 @@ class Locater:
 
     def load_cache(self):
         if not self.cache_path.is_file():
-            with open(self.cache_path, 'w') as f:
+            with open(self.cache_path, "w") as f:
                 json.dump(dict(), f)
         with open(self.cache_path, "r") as f:
             self.cache = json.load(f)
 
     def store_cache(self):
-        with open(self.cache_path, 'w') as f:
+        with open(self.cache_path, "w") as f:
             json.dump(self.cache, f)
 
     def locate(self, ip):
         if ip in self.cache:
             t = self.cache[ip]
-            country = t['country']
-            region = t['region']
-            timeZone = t['timezone']
+            country = t["country"]
+            region = t["region"]
+            timeZone = t["timezone"]
             hour, minute = get_time(timeZone)
         else:
             data = dict()
-            data['apiKey'] = self.api_key
-            data['ipAddress'] = ip
+            data["apiKey"] = self.api_key
+            data["ipAddress"] = ip
             r = requests.get(self.url, params=data)
             self.api_cnt += 1
             res = r.json()
-            country = res['location']['country']
-            region = res['location']['region']
-            timeZone = res['location']['timezone']
+            country = res["location"]["country"]
+            region = res["location"]["region"]
+            timeZone = res["location"]["timezone"]
             hour, minute = get_time(timeZone)
             self.cache[ip] = dict()
-            self.cache[ip]['country'] = country
-            self.cache[ip]['region'] = region
-            self.cache[ip]['timezone'] = timeZone
+            self.cache[ip]["country"] = country
+            self.cache[ip]["region"] = region
+            self.cache[ip]["timezone"] = timeZone
             self.store_cache()
         return get_country_name(country), region, hour, minute

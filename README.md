@@ -18,14 +18,14 @@ btw: we have a discord channel ! [join](https://discord.gg/JCepvsHNqW)
 
 ## Table of contents
 
-- [scan-for-webcams :camera:](#scan-for-webcams-camera)
-  - [Note](#note)
-  - [Table of contents](#table-of-contents)
-  - [Usage](#usage)
-  - [Installation](#installation)
-  - [Places365: On device footage classification](#places365-on-device-footage-classification)
-  - [Graphical User Interface](#graphical-user-interface)
-  - [Demo](#demo)
+- [Note](#note)
+- [Table of contents](#table-of-contents)
+- [Usage](#usage)
+- [Installation](#installation)
+- [Experimental Vision-Language Model Support](#experimental-vision-language-model-support)
+- [Places365: On device footage classification](#places365-on-device-footage-classification)
+- [Graphical User Interface](#graphical-user-interface)
+- [Demo](#demo)
 
 ## Usage
 
@@ -57,23 +57,38 @@ If your terminal supports links, click the link and open it in your browser, oth
 
 2. install requirements.txt: `pip install -r requirements.txt`
 
-3. install tkinter: `sudo apt-get install python3-tk`
-
-4. set up shodan:
+3. set up shodan:
    go to [shodan.io](https://shodan.io), register/log in and grab your API key
 
-5. set up clarifai:
+4. set up clarifai:
    go to [clarifai.com](https://clarifai.com), register/log in, create an application and grab your API key.
    Alternatively, use the local [places365](#places365-on-device-footage-classification) model.
 
-6. setup geoip:
+5. setup geoip:
    go to [geo.ipify.org](https://geo.ipify.org), register/log in and grab your API key
    
-7. Add API keys:
+6. Add API keys:
    1. run `python sfw setup`
    2. enter your shodan, clarifai and geoip API keys
 
 And then you can [run](#Usage) the program!
+
+## Experimental Vision Language Model Support
+We are working on supporting generating descriptions for footages
+via vision language models, which can generate descriptions for images in 
+natural language, instead of just tags, and can run on-device.
+Currently, we support a `llama.cpp` based `llava 7b` model.
+
+To use this, run the following commands:
+
+```shell
+pip install -U --no-cache-dir llama-cpp-python@git+https://github.com/damian0815/llama-cpp-python/@4ec35390d72faba70942b9605dfcbde2bda0bdad
+pip install huggingface_hub
+python sfw search webcamXP --vllm=True --parallel=False # or any other search command with the latter two flags
+```
+
+Note: our current VLLM integration is experimental, and may not work as expected. 
+Parallel mode must be disabled for VLLM as of now.
 
 ## Places365: On device footage classification
 It is now possible to run [the Places365 model](https://github.com/CSAILVision/places365),
